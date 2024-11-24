@@ -25,12 +25,14 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { getFirestore, collection, addDoc, doc } from 'firebase/firestore';
 import { Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import OrderFeedback from '../utils/OrderFeedback';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [groupedItems, setGroupedItems] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedShop, setSelectedShop] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
   const toast = useToast();
   const firestore = getFirestore();
   const navigate = useNavigate();
@@ -305,6 +307,7 @@ const Cart = () => {
                         duration: 3000,
                         isClosable: true,
                       });
+                      setShowFeedback(true);
                     }
                   }}
                   onError={(err) => {
@@ -325,7 +328,9 @@ const Cart = () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
+        
       </Container>
+      
     </PayPalScriptProvider>
   );
 };

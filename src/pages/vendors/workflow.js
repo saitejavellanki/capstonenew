@@ -151,7 +151,7 @@ const OrderCard = ({ order, onUpdateStatus, expandedOrders, toggleOrderExpansion
         </Button>
       </Flex>
 
-      <Collapse in={expandedOrders[order.id]} animateOpacity>
+      {/* <Collapse in={expandedOrders[order.id]} animateOpacity> */}
         <Box mt={4}>
           <Divider mb={4} />
           <Table size="sm">
@@ -219,7 +219,7 @@ const OrderCard = ({ order, onUpdateStatus, expandedOrders, toggleOrderExpansion
             </HStack>
           )}
         </Box>
-      </Collapse>
+      {/* </Collapse> */}
     </Box>
   );
 };
@@ -240,6 +240,10 @@ const KanbanColumn = ({ title, orders, onUpdateStatus, expandedOrders, toggleOrd
     acc[priority.category].push(order);
     return acc;
   }, {});
+
+  Object.keys(groupedOrders).forEach(category => {
+    groupedOrders[category].sort((a, b) => a.createdAt - b.createdAt);
+  });
 
   const toggleCategory = (category) => {
     setExpandedCategories(prev => ({
@@ -294,7 +298,7 @@ const KanbanColumn = ({ title, orders, onUpdateStatus, expandedOrders, toggleOrd
               </Heading>
             </HStack>
             
-            <Collapse in={expandedCategories[category]} animateOpacity>
+            
               <VStack spacing={4} align="stretch">
                 {groupedOrders[category].map(order => (
                   <OrderCard
@@ -307,7 +311,7 @@ const KanbanColumn = ({ title, orders, onUpdateStatus, expandedOrders, toggleOrd
                   />
                 ))}
               </VStack>
-            </Collapse>
+            
           </Box>
         )
       ))}
@@ -380,7 +384,7 @@ const VendorOrderDashboard = () => {
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date(),
           updatedAt: doc.data().updatedAt?.toDate() || new Date()
-        })).sort((a, b) => b.createdAt - a.createdAt);
+        })).sort((a, b) =>  a.createdAt - b.createdAt);
         
         setOrders(ordersList);
         setFilteredOrders(ordersList);
