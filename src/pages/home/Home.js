@@ -49,7 +49,7 @@ const MotionFlex = chakra(motion.div);
 // Constants
 const FOOD_CATEGORIES = [
   { icon: FaUtensils, title: 'Restaurant', description: 'Explore our delicious menu' },
-  { icon: FaGift, title: 'Special Offers', description: 'Check out today\'s deals' }
+  // { icon: FaGift, title: 'Special Offers', description: 'Check out today\'s deals' }
 ];
 
 const CAROUSEL_SETTINGS = {
