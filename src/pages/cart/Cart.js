@@ -19,15 +19,18 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-  Stack
+  Stack,
+  Flex,
+  IconButton,
+  useBreakpointValue
 } from '@chakra-ui/react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { getFirestore, collection, addDoc, doc } from 'firebase/firestore';
-import { Trash2 } from 'lucide-react';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import OrderFeedback from '../utils/OrderFeedback';
 
 const Cart = () => {
+  // ... (previous state management code remains the same)
   const [cartItems, setCartItems] = useState([]);
   const [groupedItems, setGroupedItems] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -36,6 +39,10 @@ const Cart = () => {
   const toast = useToast();
   const firestore = getFirestore();
   const navigate = useNavigate();
+
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const containerPadding = useBreakpointValue({ base: 4, md: 8 });
+  const imageSize = useBreakpointValue({ base: "80px", md: "100px" });
 
   useEffect(() => {
     const loadCart = () => {
@@ -62,6 +69,7 @@ const Cart = () => {
     loadCart();
   }, []);
 
+  // Existing helper functions remain the same...
   const removeFromCart = (itemId) => {
     const updatedCart = cartItems.filter(item => item.id !== itemId);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
@@ -132,10 +140,8 @@ const Cart = () => {
         paymentDetails: paymentDetails
       };
 
-      // Add order to Firestore
       const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
 
-      // Remove ordered items from cart
       const updatedCart = cartItems.filter(item => item.shopId !== shopData.id);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       setCartItems(updatedCart);
@@ -148,7 +154,6 @@ const Cart = () => {
         isClosable: true,
       });
 
-      // Navigate to order waiting page with order ID
       navigate(`/order-waiting/${newDocRef.id}`);
       onClose();
 
@@ -167,7 +172,97 @@ const Cart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <Container maxW="container.xl" py={8}>
+      <Container maxW="container.xl" py={containerPadding}>
+        <Alert status="info">
+          <AlertIcon />
+          Your cart is empty. Start shopping to add items!
+        </Alert>
+      </Container>
+    );
+  }
+
+  // ... (previous useEffect and helper functions remain the same)
+
+  const CartItem = ({ item }) => (
+    <Box width="100%">
+      <Flex gap={4} width="100%">
+        {/* Image stays on left */}
+        <Image
+          src={item.imageUrl}
+          alt={item.name}
+          boxSize={imageSize}
+          objectFit="cover"
+          borderRadius="md"
+          flexShrink={0}
+        />
+        
+        {/* Content wrapper */}
+        <Flex 
+          flex="1"
+          justify="space-between"
+          width="100%"
+          align="center"
+        >
+          {/* Product details */}
+          <VStack align="start" spacing={1}>
+            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>{item.name}</Text>
+            <Text color="gray.600" fontSize={{ base: "sm", md: "md" }}>
+              ${item.price.toFixed(2)} each
+            </Text>
+          </VStack>
+  
+          {/* Right side controls - quantity, price, delete */}
+          <Flex 
+            align="center" 
+            gap={{ base: 2, md: 6 }}
+            flexShrink={0}
+          >
+            {/* Quantity controls */}
+            <HStack spacing={2}>
+              <IconButton
+                size="sm"
+                icon={<Minus size={16} />}
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                aria-label="Decrease quantity"
+              />
+              <Text width="40px" textAlign="center">{item.quantity}</Text>
+              <IconButton
+                size="sm"
+                icon={<Plus size={16} />}
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                aria-label="Increase quantity"
+              />
+            </HStack>
+            
+            {/* Price */}
+            <Text 
+              fontWeight="bold" 
+              fontSize={{ base: "sm", md: "md" }}
+              minWidth={{ base: "60px", md: "80px" }}
+              textAlign="right"
+            >
+              ${(item.price * item.quantity).toFixed(2)}
+            </Text>
+            
+            {/* Delete button */}
+            <IconButton
+              variant="ghost"
+              colorScheme="red"
+              icon={<Trash2 size={20} />}
+              onClick={() => removeFromCart(item.id)}
+              aria-label="Remove item"
+              flexShrink={0}
+            />
+          </Flex>
+        </Flex>
+      </Flex>
+      <Divider mt={4} />
+    </Box>
+  );
+
+  if (cartItems.length === 0) {
+    return (
+      <Container maxW="container.xl" py={containerPadding}>
         <Alert status="info">
           <AlertIcon />
           Your cart is empty. Start shopping to add items!
@@ -181,97 +276,60 @@ const Cart = () => {
       "client-id": "AVTeeus2wvd60vB9WOro8-DvPiuAcOhexem573MyZHhf3mwQqmmia-6BOP9RRcl233fircUuUrECeXBl",
       currency: "GBP"
     }}>
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          <Heading size="xl">Shopping Cart</Heading>
+      <Container maxW="container.xl" py={containerPadding}>
+        <VStack spacing={6} align="stretch">
+          <Heading size={{ base: "lg", md: "xl" }}>Shopping Cart</Heading>
 
           {Object.entries(groupedItems).map(([shopId, shopData]) => (
             <Box 
               key={shopId}
               borderWidth="1px"
               borderRadius="lg"
-              p={6}
+              p={{ base: 4, md: 6 }}
               bg="white"
+              shadow="sm"
             >
-              <Heading size="lg" mb={4}>{shopData.shopName}</Heading>
+              <Heading size={{ base: "md", md: "lg" }} mb={4}>
+                {shopData.shopName}
+              </Heading>
               
               <VStack spacing={4} align="stretch">
                 {shopData.items.map((item) => (
-                  <Box key={item.id}>
-                    <HStack spacing={4} justify="space-between">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        boxSize="100px"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                      
-                      <VStack flex={1} align="start">
-                        <Text fontWeight="bold">{item.name}</Text>
-                        <Text color="gray.600">${item.price.toFixed(2)} each</Text>
-                      </VStack>
-                      
-                      <HStack>
-                        <Button
-                          size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          -
-                        </Button>
-                        <Text>{item.quantity}</Text>
-                        <Button
-                          size="sm"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </Button>
-                      </HStack>
-                      
-                      <Text fontWeight="bold">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </Text>
-                      
-                      <Button
-                        variant="ghost"
-                        colorScheme="red"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </HStack>
-                    <Divider mt={4} />
-                  </Box>
+                  <CartItem key={item.id} item={item} />
                 ))}
                 
                 <Box pt={4}>
-                  <HStack justify="space-between">
-                    <Text fontSize="xl" fontWeight="bold">
-                      Total for {shopData.shopName}:
-                    </Text>
-                    <Text fontSize="xl" fontWeight="bold" color="green.600">
-                      ${shopData.total.toFixed(2)}
-                    </Text>
-                  </HStack>
-                  
-                  <Button
-                    colorScheme="blue"
-                    size="lg"
-                    width="full"
-                    mt={4}
-                    onClick={() => handlePlaceOrder(shopId, shopData)}
+                  <Flex 
+                    direction={{ base: "column", md: "row" }}
+                    justify="space-between"
+                    align={{ base: "stretch", md: "center" }}
+                    gap={4}
                   >
-                    Place Order
-                  </Button>
+                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
+                      Total for {shopData.shopName}:
+                      <Text as="span" color="green.600" ml={2}>
+                        ${shopData.total.toFixed(2)}
+                      </Text>
+                    </Text>
+                    
+                    <Button
+                      colorScheme="blue"
+                      size={{ base: "md", md: "lg" }}
+                      width={{ base: "full", md: "auto" }}
+                      onClick={() => handlePlaceOrder(shopId, shopData)}
+                    >
+                      Place Order
+                    </Button>
+                  </Flex>
                 </Box>
               </VStack>
             </Box>
           ))}
         </VStack>
 
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }}>
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent margin={{ base: 0, md: "auto" }}>
             <ModalHeader>Confirm Order and Pay</ModalHeader>
             <ModalBody>
               <Stack spacing={4}>
@@ -292,7 +350,6 @@ const Cart = () => {
                   }}
                   onApprove={async (data, actions) => {
                     const details = await actions.order.capture();
-                    
                     const orderId = await createFirestoreOrder(selectedShop, {
                       orderID: details.id,
                       payerID: details.payer.payer_id,
@@ -328,9 +385,7 @@ const Cart = () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
-        
       </Container>
-      
     </PayPalScriptProvider>
   );
 };

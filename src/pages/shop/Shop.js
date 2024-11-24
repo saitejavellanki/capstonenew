@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { 
   Box, 
   Container,
-  SimpleGrid,
+  Grid,
   Image, 
   Text, 
   VStack, 
@@ -22,7 +22,8 @@ import {
   ModalCloseButton,
   useDisclosure,
   Stack,
-  IconButton
+  IconButton,
+  Badge
 } from '@chakra-ui/react';
 import { 
   getFirestore, 
@@ -162,6 +163,7 @@ const Shop = () => {
       });
     }
   };
+  // Keep all your existing useEffect and functions here...
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -177,47 +179,47 @@ const Shop = () => {
           </Alert>
         ) : (
           <>
+            {/* Shop Header */}
             {shopDetails && (
-              <Box textAlign="center" position="relative">
-                <Box 
-                  height="300px" 
-                  mb={6} 
-                  borderRadius="xl" 
-                  overflow="hidden"
+              <Box 
+                position="relative" 
+                height="300px" 
+                mb={6} 
+                borderRadius="xl" 
+                overflow="hidden"
+              >
+                <Image 
+                  src={shopDetails.imageUrl} 
+                  alt={shopDetails.name}
+                  w="100%"
+                  h="100%"
+                  objectFit="cover"
+                />
+                <Box
+                  position="absolute"
+                  bottom={0}
+                  left={0}
+                  right={0}
+                  bg="blackAlpha.700"
+                  p={6}
                 >
-                  <Image 
-                    src={shopDetails.imageUrl} 
-                    alt={shopDetails.name}
-                    w="100%"
-                    h="100%"
-                    objectFit="cover"
-                  />
-                  <Box
-                    position="absolute"
-                    bottom={0}
-                    left={0}
-                    right={0}
-                    bg="blackAlpha.700"
-                    p={4}
-                    borderBottomRadius="xl"
-                  >
-                    <Heading color="white" size="lg">
-                      {shopDetails.name}
-                    </Heading>
-                    {shopDetails.description && (
-                      <Text 
-                        color="whiteAlpha.800" 
-                        mt={2} 
-                        noOfLines={2}
-                      >
-                        {shopDetails.description}
-                      </Text>
-                    )}
-                  </Box>
+                  <Heading color="white" size="xl">
+                    {shopDetails.name}
+                  </Heading>
+                  {shopDetails.description && (
+                    <Text 
+                      color="whiteAlpha.900" 
+                      mt={2} 
+                      fontSize="lg"
+                    >
+                      {shopDetails.description}
+                    </Text>
+                  )}
                 </Box>
               </Box>
             )}
 
+            {/* Items Section */}
             <Box>
               <Heading size="lg" mb={6}>Available Items</Heading>
               
@@ -227,10 +229,7 @@ const Shop = () => {
                   <Text>No items available in this shop at the moment.</Text>
                 </Alert>
               ) : (
-                <SimpleGrid 
-                  columns={{ base: 1, md: 2, lg: 3, xl: 4 }} 
-                  spacing={6}
-                >
+                <VStack spacing={4} align="stretch">
                   {items.map((item) => (
                     <Box
                       key={item.id}
@@ -240,61 +239,82 @@ const Shop = () => {
                       boxShadow="sm"
                       transition="all 0.2s"
                       _hover={{
-                        transform: 'translateY(-5px)',
-                        boxShadow: 'lg',
+                        transform: 'translateY(-2px)',
+                        boxShadow: 'md',
                       }}
                       bg="white"
                     >
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        height="250px"
-                        width="100%"
-                        objectFit="cover"
-                        cursor="pointer"
-                        onClick={() => handleItemClick(item)}
-                      />
-                      
-                      <Box p={4}>
-                        <Heading size="md" mb={2} noOfLines={1}>
-                          {item.name}
-                        </Heading>
-                        <Text 
-                          color="gray.600" 
-                          noOfLines={2} 
-                          mb={3} 
-                          minHeight="40px"
+                      <Flex direction="row">
+                        {/* Left side - Square Image */}
+                        <Box 
+                          width="120px"
+                          height="120px"
+                          flexShrink={0}
+                          borderRadius="md"
+                          overflow="hidden"
                         >
-                          {item.description}
-                        </Text>
-                        
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.name}
+                            width="100%"
+                            height="100%"
+                            objectFit="cover"
+                            cursor="pointer"
+                            onClick={() => handleItemClick(item)}
+                          />
+                        </Box>
+
+                        {/* Right side - Content */}
                         <Flex 
-                          justify="space-between" 
-                          align="center"
+                          flex="1" 
+                          ml={4}
+                          direction="column"
+                          justify="space-between"
                         >
-                          <Text
-                            color="green.600"
-                            fontSize="xl"
-                            fontWeight="bold"
+                          <Box>
+                            <Heading size="sm" mb={1}>
+                              {item.name}
+                            </Heading>
+                            <Text 
+                              color="gray.600" 
+                              noOfLines={2}
+                              mb={2}
+                              fontSize="sm"
+                            >
+                              {item.description}
+                            </Text>
+                          </Box>
+
+                          <Flex 
+                            justify="space-between" 
+                            align="center"
+                            mt="auto"
                           >
-                            ${item.price.toFixed(2)}
-                          </Text>
-                          <Button
-                            colorScheme="blue"
-                            onClick={() => addToCart(item)}
-                            size="sm"
-                          >
-                            Add to Cart
-                          </Button>
+                            <Text
+                              color="green.600"
+                              fontSize="2xl"
+                              fontWeight="bold"
+                            >
+                              ${item.price.toFixed(2)}
+                            </Text>
+                            <Button
+                              colorScheme="blue"
+                              onClick={() => addToCart(item)}
+                              size="sm"
+                              width="auto"
+                            >
+                              Add to Cart
+                            </Button>
+                          </Flex>
                         </Flex>
-                      </Box>
+                      </Flex>
                     </Box>
                   ))}
-                </SimpleGrid>
+                </VStack>
               )}
             </Box>
 
-            {/* Item Details Modal */}
+            {/* Keep your existing Modal code */}
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
               <ModalOverlay />
               <ModalContent>
