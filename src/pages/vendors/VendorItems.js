@@ -25,6 +25,8 @@ import {
   HStack,
   Flex,
   useBreakpointValue,
+  Select,
+  Badge,
 } from "@chakra-ui/react";
 import { Link } from 'react-router-dom';
 import {
@@ -38,6 +40,24 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from "../../Components/firebase/Firebase";
 
+const FOOD_CATEGORIES = [
+  "Beverages",
+  "Appetizers",
+  "Main Course",
+  "Desserts",
+  "Snacks",
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Vegan",
+  "Vegetarian",
+  "Salads",
+  "Soups",
+  "Fast Food",
+  "Street Food",
+  "Healthy Options"
+];
+
 const VendorItems = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +67,7 @@ const VendorItems = () => {
     price: "",
     description: "",
     imageUrl: "",
+    category: "", // Added category field
   });
   const [itemImage, setItemImage] = useState(null);
   const [itemImagePreview, setItemImagePreview] = useState('');
@@ -59,10 +80,10 @@ const VendorItems = () => {
 
   // Responsive column configuration
   const gridColumns = useBreakpointValue({ 
-    base: "repeat(1, 1fr)",  // 1 column on mobile
-    sm: "repeat(2, 1fr)",    // 2 columns on small screens
-    md: "repeat(3, 1fr)",    // 3 columns on medium screens
-    lg: "repeat(auto-fill, minmax(250px, 1fr))" // flexible columns on large screens
+    base: "repeat(1, 1fr)",
+    sm: "repeat(2, 1fr)",
+    md: "repeat(3, 1fr)",
+    lg: "repeat(auto-fill, minmax(250px, 1fr))"
   });
 
   // Responsive button stack direction
@@ -200,6 +221,7 @@ const VendorItems = () => {
         price: parseFloat(itemData.price),
         description: itemData.description,
         imageUrl: imageUrl,
+        category: itemData.category, // Added category
         vendorId: user.uid,
         shopId: user.shopId || user.uid,
         createdAt: new Date(),
@@ -215,6 +237,7 @@ const VendorItems = () => {
         price: "",
         description: "",
         imageUrl: "",
+        category: "", // Reset category
       });
       setItemImage(null);
       setItemImagePreview('');
@@ -243,13 +266,7 @@ const VendorItems = () => {
 
   if (loading) {
     return (
-      <Box
-        p={6}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minH="200px"
-      >
+      <Box p={6} display="flex" justifyContent="center" alignItems="center" minH="200px">
         <Spinner size="xl" />
       </Box>
     );
@@ -336,12 +353,14 @@ const VendorItems = () => {
                   fallbackSrc="https://via.placeholder.com/200"
                 />
                 <Box p={{ base: 2, md: 4 }}>
-                  <Heading 
-                    size={{ base: 'sm', md: 'md' }} 
-                    mb={2}
-                  >
-                    {item.name}
-                  </Heading>
+                  <Flex justify="space-between" align="center" mb={2}>
+                    <Heading size={{ base: 'sm', md: 'md' }}>
+                      {item.name}
+                    </Heading>
+                    <Badge colorScheme="purple" fontSize="0.8em">
+                      {item.category}
+                    </Badge>
+                  </Flex>
                   <Text
                     color="green.500"
                     fontSize={{ base: 'lg', md: 'xl' }}
@@ -387,6 +406,23 @@ const VendorItems = () => {
                       placeholder="Enter item name"
                       size={{ base: 'md', md: 'lg' }}
                     />
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      name="category"
+                      value={itemData.category}
+                      onChange={handleInputChange}
+                      placeholder="Select category"
+                      size={{ base: 'md', md: 'lg' }}
+                    >
+                      {FOOD_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </Select>
                   </FormControl>
 
                   <FormControl isRequired>

@@ -1,3 +1,4 @@
+// Updated App.js
 import React, { useState, useEffect } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -19,6 +20,7 @@ import Footer from './Components/footer/Footer';
 import OrderPickupConfirmation from './Components/order/OrderConfirmation';
 import UserProfile from './pages/user/UserProfile';
 import VendorDashboard from './pages/vendors/workflow';
+import ScrollToTop from './pages/utils/ScrollToTop'; // Add this import
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -54,10 +56,22 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   return children;
 };
 
+const NotFound = () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return null;
+};
+
 function App() {
   return (
     <ChakraProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.PUBLIC_URL}>
+        <ScrollToTop /> {/* Add the ScrollToTop component here */}
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -67,7 +81,6 @@ function App() {
           <Route path="/order-confirmation" element={<OrderPickupConfirmation />} />
           <Route path="/Profile" element={<UserProfile />} />
           
-          {/* New Vendor Dashboard Route with Protection */}
           <Route 
             path="/vendor/dashboard" 
             element={
@@ -133,6 +146,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer/>
       </BrowserRouter>

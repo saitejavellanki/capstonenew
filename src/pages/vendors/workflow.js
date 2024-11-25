@@ -21,7 +21,7 @@ import {
   Tr,
   Th,
   Td,
-  Collapse,
+  SimpleGrid,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -30,9 +30,11 @@ import {
   ModalFooter,
   ModalCloseButton,
   useToast,
-  SimpleGrid
+  Alert,
+  AlertIcon
 } from '@chakra-ui/react';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import OrderDetailsModal from '../utils/orderDetailsModel';
 import { 
   AiOutlineClockCircle, 
   AiOutlineCheckCircle, 
@@ -45,11 +47,12 @@ import {
 } from 'react-icons/ai';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 
-// Reuse existing calculation functions
+// Keep existing calculation functions
 const calculatePrepTime = (items) => {
   const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
   return 2 + totalItems;
 };
+
 const getCategoryColor = (category) => {
   switch (category) {
     case 'express': return 'green';
@@ -241,9 +244,7 @@ const KanbanColumn = ({ title, orders, onUpdateStatus, expandedOrders, toggleOrd
     return acc;
   }, {});
 
-  Object.keys(groupedOrders).forEach(category => {
-    groupedOrders[category].sort((a, b) => a.createdAt - b.createdAt);
-  });
+  
 
   const toggleCategory = (category) => {
     setExpandedCategories(prev => ({
@@ -361,6 +362,10 @@ const VendorOrderDashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState({});
   const [qrScannerModal, setQRScannerModal] = useState({ isOpen: false, order: null });
+  const [lastScannedOrderId, setLastScannedOrderId] = useState(null);
+  const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+  const [scannedOrderModal, setScannedOrderModal] = useState({ isOpen: false, order: null });
   const toast = useToast();
   const firestore = getFirestore();
 
@@ -371,39 +376,108 @@ const VendorOrderDashboard = () => {
     }));
   };
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const ordersRef = collection(firestore, 'orders');
-        const q = query(ordersRef, where('shopId', '==', user.shopId));
-        const snapshot = await getDocs(q);
-        
-        const ordersList = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate() || new Date()
-        })).sort((a, b) =>  a.createdAt - b.createdAt);
-        
-        setOrders(ordersList);
-        setFilteredOrders(ordersList);
-      } catch (error) {
-        console.error('Failed to fetch orders', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch orders',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    };
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const ordersRef = collection(firestore, 'orders');
+      const q = query(ordersRef, where('shopId', '==', user.shopId));
+      const snapshot = await getDocs(q);
+      
+      const ordersList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate() || new Date()
+      })).sort((a, b) => a.createdAt - b.createdAt);
+      
+      setOrders(ordersList);
+      setFilteredOrders(ordersList);
+      setLastUpdateTime(new Date());
+    } catch (error) {
+      console.error('Failed to fetch orders', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch orders',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const orderRef = doc(firestore, 'orders', orderId);
+      await updateDoc(orderRef, {
+        status: newStatus,
+        updatedAt: new Date()
+      });
+      
+      await fetchOrders();
+      
+      toast({
+        title: 'Order Updated',
+        description: `Order status changed to ${newStatus}`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update order status',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleScanQR = (order) => {
+    setQRScannerModal({
+      isOpen: true,
+      order: order
+    });
+  };
+
+  const handleQRScanComplete = async (orderId) => {
+    try {
+      await updateDoc(doc(firestore, 'orders', orderId), {
+        status: 'picked_up',
+        pickedUpAt: new Date()
+      });
+
+      setLastScannedOrderId(orderId);
+      await fetchOrders();
+
+      toast({
+        title: 'Order Picked Up',
+        description: 'Order has been successfully picked up',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Failed to complete order pickup:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to complete order pickup',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
+    const interval = setInterval(fetchOrders, 10000);
     return () => clearInterval(interval);
-  }, [firestore, toast]);
+  }, []);
 
   useEffect(() => {
     let result = orders;
@@ -424,60 +498,36 @@ const VendorOrderDashboard = () => {
     setFilteredOrders(result);
   }, [orders, searchTerm, categoryFilter]);
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const handlePersistentQRScan = async (result) => {
     try {
-      const updateData = {
-        status: newStatus,
-        updatedAt: new Date()
-      };
-
-      if (newStatus === 'completed') {
-        updateData.pickupCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-        
+      const scannedValue = result[0]?.rawValue;
+      const expectedPrefix = 'order-pickup:';
+      
+      if (!scannedValue || !scannedValue.startsWith(expectedPrefix)) {
+        throw new Error('Invalid QR code');
       }
 
-      await updateDoc(doc(firestore, 'orders', orderId), updateData);
-      
-      setOrders(orders.map(order => 
-        order.id === orderId 
-          ? { ...order, ...updateData } 
-          : order
-      ));
+      const orderId = scannedValue.replace(expectedPrefix, '');
+      const scanningOrder = orders.find(order => order.id === orderId);
 
-      toast({
-        title: 'Status Updated',
-        description: `Order status updated to ${newStatus}`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error('Failed to update order status', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update order status',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  const handleScanQR = (order) => {
-    setQRScannerModal({ isOpen: true, order });
-  };
+      if (!scanningOrder) {
+        throw new Error('Order not found');
+      }
 
-  const handleQRScanComplete = async (orderId) => {
-    try {
+      if (scanningOrder.status !== 'completed') {
+        throw new Error('Order is not ready for pickup');
+      }
+
+      // Show the order details modal
+      setScannedOrderModal({ isOpen: true, order: scanningOrder });
+
       await updateDoc(doc(firestore, 'orders', orderId), {
         status: 'picked_up',
         pickedUpAt: new Date()
       });
 
-      setOrders(orders.map(order => 
-        order.id === orderId 
-          ? { ...order, status: 'picked_up', pickedUpAt: new Date() } 
-          : order
-      ));
+      setLastScannedOrderId(orderId);
+      await fetchOrders();
 
       toast({
         title: 'Order Picked Up',
@@ -487,10 +537,9 @@ const VendorOrderDashboard = () => {
         isClosable: true,
       });
     } catch (error) {
-      console.error('Failed to complete pickup', error);
       toast({
         title: 'Error',
-        description: 'Failed to complete pickup',
+        description: error.message,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -500,72 +549,106 @@ const VendorOrderDashboard = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
-      <VStack spacing={6} align="stretch">
-        <HStack spacing={4}>
-          <InputGroup>
-            <InputLeftElement pointerEvents="none">
-              <AiOutlineSearch />
-            </InputLeftElement>
-            <Input 
-              placeholder="Search orders..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+      <Flex direction={{ base: 'column', xl: 'row' }} gap={6}>
+        <VStack spacing={6} align="stretch" flex="3">
+          <HStack justify="space-between" mb={4}>
+            <Heading size="xl">Orders Dashboard</Heading>
+            <Box>
+              <Text fontSize="sm" color="gray.500">
+                Last updated: {lastUpdateTime.toLocaleTimeString()}
+              </Text>
+              {loading && <Badge ml={2} colorScheme="blue">Refreshing...</Badge>}
+            </Box>
+          </HStack>
+
+          <HStack spacing={4}>
+            <InputGroup>
+              <InputLeftElement pointerEvents="none">
+                <AiOutlineSearch />
+              </InputLeftElement>
+              <Input 
+                placeholder="Search orders..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </InputGroup>
+            <Select 
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              width="200px"
+            >
+              <option value="all">All Categories</option>
+              <option value="express">Express</option>
+              <option value="standard">Standard</option>
+              <option value="complex">Complex</option>
+            </Select>
+          </HStack>
+
+          <SimpleGrid columns={[1, 1, 3]} spacing={4} width="100%">
+            <KanbanColumn
+              title="Pending Orders"
+              orders={filteredOrders.filter(order => order.status === 'pending')}
+              onUpdateStatus={updateOrderStatus}
+              expandedOrders={expandedOrders}
+              toggleOrderExpansion={toggleOrderExpansion}
+              onScanQR={handleScanQR}
+              icon={<AiOutlineClockCircle />}
+              colorScheme="yellow"
             />
-          </InputGroup>
-          <Select 
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            width="200px"
-          >
-            <option value="all">All Categories</option>
-            <option value="express">Express</option>
-            <option value="standard">Standard</option>
-            <option value="complex">Complex</option>
-          </Select>
-        </HStack>
 
-        <SimpleGrid columns={[1, 1, 3]} spacing={4} width="100%">
-          <KanbanColumn
-            title="Pending Orders"
-            orders={filteredOrders.filter(order => order.status === 'pending')}
-            onUpdateStatus={updateOrderStatus}
-            expandedOrders={expandedOrders}
-            toggleOrderExpansion={toggleOrderExpansion}
-            onScanQR={handleScanQR}
-            icon={<AiOutlineClockCircle />}
-            colorScheme="yellow"
-          />
+            <KanbanColumn
+              title="Processing"
+              orders={filteredOrders.filter(order => order.status === 'processing')}
+              onUpdateStatus={updateOrderStatus}
+              expandedOrders={expandedOrders}
+              toggleOrderExpansion={toggleOrderExpansion}
+              onScanQR={handleScanQR}
+              icon={<AiOutlinePlayCircle />}
+              colorScheme="blue"
+            />
 
-          <KanbanColumn
-            title="Processing"
-            orders={filteredOrders.filter(order => order.status === 'processing')}
-            onUpdateStatus={updateOrderStatus}
-            expandedOrders={expandedOrders}
-            toggleOrderExpansion={toggleOrderExpansion}
-            onScanQR={handleScanQR}
-            icon={<AiOutlinePlayCircle />}
-            colorScheme="blue"
-          />
+            <KanbanColumn
+              title="Ready for Pickup"
+              orders={filteredOrders.filter(order => order.status === 'completed')}
+              onUpdateStatus={updateOrderStatus}
+              expandedOrders={expandedOrders}
+              toggleOrderExpansion={toggleOrderExpansion}
+              onScanQR={handleScanQR}
+              icon={<AiOutlineCheckCircle />}
+              colorScheme="green"
+            />
+          </SimpleGrid>
+        </VStack>
 
-          <KanbanColumn
-            title="Ready for Pickup"
-            orders={filteredOrders.filter(order => order.status === 'completed')}
-            onUpdateStatus={updateOrderStatus}
-            expandedOrders={expandedOrders}
-            toggleOrderExpansion={toggleOrderExpansion}
-            onScanQR={handleScanQR}
-            icon={<AiOutlineCheckCircle />}
-            colorScheme="green"
-          />
-        </SimpleGrid>
+        <Box flex="1" position="sticky" top="20px" height="fit-content">
+          <Box borderWidth={1} borderRadius="lg" p={4} bg={useColorModeValue('white', 'gray.800')}>
+            <Heading size="md" mb={4} textAlign="center">Quick Pickup Scanner</Heading>
+            <Scanner 
+              onScan={handlePersistentQRScan} 
+              onError={(error) => console.error(error?.message)}
+            />
+            {lastScannedOrderId && (
+              <Alert status="success" mt={4}>
+                <AlertIcon />
+                Last scanned: Order #{lastScannedOrderId.slice(-6)}
+              </Alert>
+            )}
+          </Box>
+        </Box>
+      </Flex>
 
-        <QRScannerModal
-          isOpen={qrScannerModal.isOpen}
-          onClose={() => setQRScannerModal({ isOpen: false, order: null })}
-          order={qrScannerModal.order}
-          onScanComplete={handleQRScanComplete}
-        />
-      </VStack>
+      <QRScannerModal
+        isOpen={qrScannerModal.isOpen}
+        onClose={() => setQRScannerModal({ isOpen: false, order: null })}
+        order={qrScannerModal.order}
+        onScanComplete={handleQRScanComplete}
+      />
+
+<OrderDetailsModal
+        isOpen={scannedOrderModal.isOpen}
+        onClose={() => setScannedOrderModal({ isOpen: false, order: null })}
+        order={scannedOrderModal.order}
+      />
     </Container>
   );
 };
