@@ -366,6 +366,8 @@ const VendorOrderDashboard = () => {
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [scannedOrderModal, setScannedOrderModal] = useState({ isOpen: false, order: null });
+  const [scannerKey, setScannerKey] = useState(0);
+  const [scannerError, setScannerError] = useState(null);
   const toast = useToast();
   const firestore = getFirestore();
 
@@ -500,35 +502,51 @@ const VendorOrderDashboard = () => {
 
   const handlePersistentQRScan = async (result) => {
     try {
+      // Ensure orders are loaded before scanning
+      if (orders.length === 0) {
+        await fetchOrders();
+      }
+  
       const scannedValue = result[0]?.rawValue;
       const expectedPrefix = 'order-pickup:';
       
       if (!scannedValue || !scannedValue.startsWith(expectedPrefix)) {
         throw new Error('Invalid QR code');
       }
-
+  
       const orderId = scannedValue.replace(expectedPrefix, '');
+      
+      // Additional logging for debugging
+      console.log('Scanned Order ID:', orderId);
+      console.log('Current Orders:', orders.map(o => o.id));
+  
       const scanningOrder = orders.find(order => order.id === orderId);
-
+  
       if (!scanningOrder) {
-        throw new Error('Order not found');
+        // If order not found, force a refresh and try again
+        await fetchOrders();
+        const refreshedScanningOrder = orders.find(order => order.id === orderId);
+        
+        if (!refreshedScanningOrder) {
+          throw new Error('Order not found');
+        }
       }
-
+  
       if (scanningOrder.status !== 'completed') {
         throw new Error('Order is not ready for pickup');
       }
-
+  
       // Show the order details modal
       setScannedOrderModal({ isOpen: true, order: scanningOrder });
-
+  
       await updateDoc(doc(firestore, 'orders', orderId), {
         status: 'picked_up',
         pickedUpAt: new Date()
       });
-
+  
       setLastScannedOrderId(orderId);
       await fetchOrders();
-
+  
       toast({
         title: 'Order Picked Up',
         description: 'Order has been successfully picked up',

@@ -224,66 +224,124 @@ const Home = () => {
     >
       <Container maxW="container.xl">
         {/* Active Orders Banner */}
-        {activeOrders.length > 0 && (
-          <MotionBox
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            mb={{ base: 6, md: 8 }}
+{activeOrders.length > 0 && (
+  <MotionBox
+    initial={{ y: -20, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    transition={{ duration: 0.5 }}
+    mb={{ base: 6, md: 8 }}
+  >
+    <Flex
+      bg="green.500"
+      p={{ base: 4, md: 6 }}
+      borderRadius="2xl"
+      align="center"
+      justify="space-between"
+      boxShadow="xl"
+      position="relative"
+      overflow="hidden"
+    >
+      {/* Background Gradient Overlay */}
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(to-r, green.600, green.400)"
+        opacity={0.9}
+        zIndex={1}
+      />
+
+      {/* Content */}
+      <Flex 
+        align="center" 
+        position="relative" 
+        zIndex={2} 
+        w="full"
+        direction={{ base: 'column', sm: 'row' }}
+        gap={4}
+      >
+        {/* Order Icon and Details */}
+        <Flex align="center" flex={1} gap={4}>
+          <Box 
+            bg="white" 
+            p={3} 
+            borderRadius="full" 
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
           >
-            <Box
-              bg="white"
-              p={{ base: 4, md: 6 }}
-              borderRadius="2xl"
-              boxShadow="xl"
-              border="1px"
-              borderColor="green.100"
+            <Icon
+              as={FaShoppingBag}
+              boxSize={{ base: 6, md: 8 }}
+              color="green.500"
+            />
+          </Box>
+          
+          <VStack align="start" spacing={0} color="white">
+            <Text
+              fontSize={{ base: 'lg', md: 'xl' }}
+              fontWeight="bold"
             >
-              <Flex 
-                align="center" 
-                justify="space-between"
-                direction={{ base: 'column', sm: 'row' }}
-                gap={4}
-              >
-                <Flex align="center" gap={4}>
-                  <Icon 
-                    as={FaShoppingBag} 
-                    boxSize={{ base: 6, md: 8 }} 
-                    color="green.500" 
-                  />
-                  <VStack align="start" spacing={0}>
-                    <Text 
-                      fontSize={{ base: 'lg', md: 'xl' }} 
-                      fontWeight="bold" 
-                      color="gray.800"
-                    >
-                      {activeOrders.length} Active Order{activeOrders.length > 1 ? 's' : ''}
-                    </Text>
-                    <Text 
-                      fontSize={{ base: 'sm', md: 'md' }} 
-                      color="gray.600"
-                    >
-                      Track your orders in real-time
-                    </Text>
-                  </VStack>
-                </Flex>
-                <Button
-                  colorScheme="green"
-                  size={{ base: 'md', md: 'lg' }}
-                  onClick={() => setIsOrderModalOpen(true)}
-                  leftIcon={<FaEye />}
-                  w={{ base: 'full', sm: 'auto' }}
-                  _hover={{
-                    transform: 'translateY(-2px)',
-                    boxShadow: 'lg'
-                  }}
-                >
-                  View Orders
-                </Button>
-              </Flex>
-            </Box>
-          </MotionBox>
-        )}
+              {activeOrders.length} Active Order{activeOrders.length > 1 ? 's' : ''}
+            </Text>
+            <Text
+              fontSize={{ base: 'sm', md: 'md' }}
+              color="green.100"
+            >
+              Track your orders in real-time
+            </Text>
+          </VStack>
+        </Flex>
+
+        {/* View Orders Button */}
+        <Button
+          variant="solid"
+          bg="white"
+          color="green.600"
+          size={{ base: 'md', md: 'lg' }}
+          onClick={() => setIsOrderModalOpen(true)}
+          leftIcon={<FaEye />}
+          w={{ base: 'full', sm: 'auto' }}
+          _hover={{
+            bg: 'green.50',
+            transform: 'scale(1.05)'
+          }}
+          transition="all 0.3s ease"
+        >
+          View Orders
+        </Button>
+      </Flex>
+
+      {/* Decorative Shapes */}
+      <Box
+        position="absolute"
+        top="-50%"
+        right="-10%"
+        transform="rotate(45deg)"
+        w="200px"
+        h="200px"
+        bg="green.300"
+        opacity={0.3}
+        borderRadius="full"
+        zIndex={1}
+      />
+      <Box
+        position="absolute"
+        bottom="-50%"
+        left="-10%"
+        transform="rotate(-45deg)"
+        w="200px"
+        h="200px"
+        bg="green.300"
+        opacity={0.3}
+        borderRadius="full"
+        zIndex={1}
+      />
+    </Flex>
+  </MotionBox>
+)}
 
         {/* Main Content */}
         <Flex

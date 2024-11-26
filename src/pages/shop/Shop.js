@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
   Box, 
@@ -21,9 +21,8 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  Stack,
-  IconButton,
-  Badge
+  useBreakpointValue,
+  chakra
 } from '@chakra-ui/react';
 import { 
   getFirestore, 
@@ -36,23 +35,49 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
 
+const FOOD_CATEGORIES = [
+  "Beverages",
+  "Appetizers",
+  "Main Course",
+  "Desserts",
+  "Snacks",
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Vegan",
+  "Vegetarian",
+  "Salads",
+  "Soups",
+  "Fast Food",
+  "Street Food",
+  "Healthy Options"
+];
+
 const Shop = () => {
   const [items, setItems] = useState([]);
+  const [categorizedItems, setCategorizedItems] = useState({});
   const [shopDetails, setShopDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
   const { shopId } = useParams();
   const firestore = getFirestore(app);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Refs for category sections
+  const categoryRefs = useRef({});
+
+  // Responsive menu visibility
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
   useEffect(() => {
     const fetchShopData = async () => {
       try {
         setLoading(true);
         
-        // First, fetch shop details
+        // Fetch shop details (existing logic)
         const shopRef = doc(firestore, 'shops', shopId);
         const shopSnap = await getDoc(shopRef);
         
@@ -66,32 +91,20 @@ const Shop = () => {
         };
         setShopDetails(shopData);
     
-        // More flexible item fetching
+        // Fetch items (existing logic)
         const itemsRef = collection(firestore, 'items');
         
-        // More comprehensive query strategies
         const queryStrategies = [
-          // Match on vendorId exactly
           query(itemsRef, where('vendorId', '==', shopData.vendorId)),
-          
-          // Match on shopId if available in shop data
           ...(shopData.vendorId ? [
             query(itemsRef, where('shopId', '==', shopData.id)),
             query(itemsRef, where('vendorId', 'in', [shopData.vendorId, shopId, shopData.id]))
           ] : [])
         ];
     
-        // Fetch items using multiple strategies
-        const itemPromises = queryStrategies.map(q => getDocs(q));
-        const snapshots = await Promise.all(itemPromises);
-    
-        // Collect and deduplicate items with logging
+        const snapshots = await Promise.all(queryStrategies.map(q => getDocs(q)));
         const itemsList = snapshots.flatMap(snapshot => 
-          snapshot.docs.map(doc => {
-            const item = { id: doc.id, ...doc.data() };
-            console.log('Fetched Item:', item); // Log each item for debugging
-            return item;
-          })
+          snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
         );
     
         // Remove duplicate items
@@ -99,9 +112,26 @@ const Shop = () => {
           new Map(itemsList.map(item => [item.id, item])).values()
         );
         
-        console.log('Total Unique Items:', uniqueItems.length); // Log total items
-        
         setItems(uniqueItems);
+
+        // Categorize items
+        const categorized = uniqueItems.reduce((acc, item) => {
+          const category = item.category || 'Uncategorized';
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(item);
+          return acc;
+        }, {});
+
+        setCategorizedItems(categorized);
+        
+        // Set first non-empty category as active
+        const firstNonEmptyCategory = Object.keys(categorized).find(
+          category => categorized[category].length > 0
+        );
+        setActiveCategory(firstNonEmptyCategory);
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching shop data:', error);
@@ -163,10 +193,64 @@ const Shop = () => {
       });
     }
   };
-  // Keep all your existing useEffect and functions here...
+
+  const scrollToCategory = (category) => {
+    setActiveCategory(category);
+    const categoryElement = categoryRefs.current[category];
+    if (categoryElement) {
+      categoryElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Category Navigation Menu
+  const CategoryNavigation = () => (
+    <Box 
+      position="fixed" 
+      bottom={4} 
+      left={0} 
+      right={0} 
+      zIndex={10} 
+      px={4}
+    >
+      <Flex 
+        bg="whiteAlpha.800" 
+        backdropFilter="blur(10px)" 
+        borderRadius="full" 
+        boxShadow="0 4px 6px rgba(0,0,0,0.1)" 
+        overflowX="auto" 
+        p={2} 
+        gap={2}
+        maxW="600px"
+        mx="auto"
+        border="1px solid"
+        borderColor="gray.100"
+      >
+        {Object.keys(categorizedItems).map(category => (
+          category !== 'Uncategorized' && (
+            <Button
+              key={category}
+              size="sm"
+              variant={activeCategory === category ? "solid" : "ghost"}
+              colorScheme={activeCategory === category ? "blue" : "gray"}
+              borderRadius="full"
+              onClick={() => scrollToCategory(category)}
+              px={3}
+              transition="all 0.2s"
+              _hover={{
+                transform: activeCategory === category ? 'none' : 'scale(1.05)',
+                bg: activeCategory === category ? undefined : 'gray.50'
+              }}
+            >
+              {category}
+            </Button>
+          )
+        ))}
+      </Flex>
+    </Box>
+  );
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <Container maxW="container.xl" py={8} position="relative" pb={20}>
       <VStack spacing={8} align="stretch">
         {loading ? (
           <Flex justify="center" align="center" height="200px">
@@ -179,7 +263,7 @@ const Shop = () => {
           </Alert>
         ) : (
           <>
-            {/* Shop Header */}
+            {/* Shop Header - Existing code */}
             {shopDetails && (
               <Box 
                 position="relative" 
@@ -219,102 +303,112 @@ const Shop = () => {
               </Box>
             )}
 
-            {/* Items Section */}
+            {/* Categorized Items Section */}
             <Box>
-              <Heading size="lg" mb={6}>Available Items</Heading>
-              
               {items.length === 0 ? (
                 <Alert status="info" variant="left-accent">
                   <AlertIcon />
                   <Text>No items available in this shop at the moment.</Text>
                 </Alert>
               ) : (
-                <VStack spacing={4} align="stretch">
-                  {items.map((item) => (
-                    <Box
-                      key={item.id}
-                      borderWidth="1px"
-                      borderRadius="lg"
-                      overflow="hidden"
-                      boxShadow="sm"
-                      transition="all 0.2s"
-                      _hover={{
-                        transform: 'translateY(-2px)',
-                        boxShadow: 'md',
-                      }}
-                      bg="white"
+                Object.keys(categorizedItems)
+                  .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+                  .map(category => (
+                    <Box 
+                      key={category} 
+                      mb={8}
+                      ref={el => categoryRefs.current[category] = el}
                     >
-                      <Flex direction="row">
-                        {/* Left side - Square Image */}
-                        <Box 
-                          width="120px"
-                          height="120px"
-                          flexShrink={0}
-                          borderRadius="md"
-                          overflow="hidden"
-                        >
-                          <Image
-                            src={item.imageUrl}
-                            alt={item.name}
-                            width="100%"
-                            height="100%"
-                            objectFit="cover"
-                            cursor="pointer"
-                            onClick={() => handleItemClick(item)}
-                          />
-                        </Box>
-
-                        {/* Right side - Content */}
-                        <Flex 
-                          flex="1" 
-                          ml={4}
-                          direction="column"
-                          justify="space-between"
-                        >
-                          <Box>
-                            <Heading size="sm" mb={1}>
-                              {item.name}
-                            </Heading>
-                            <Text 
-                              color="gray.600" 
-                              noOfLines={2}
-                              mb={2}
-                              fontSize="sm"
-                            >
-                              {item.description}
-                            </Text>
-                          </Box>
-
-                          <Flex 
-                            justify="space-between" 
-                            align="center"
-                            mt="auto"
+                      <Heading size="lg" mb={6}>{category}</Heading>
+                      <VStack spacing={4} align="stretch">
+                        {categorizedItems[category].map((item) => (
+                          <Box
+                            key={item.id}
+                            borderWidth="1px"
+                            borderRadius="lg"
+                            overflow="hidden"
+                            boxShadow="sm"
+                            transition="all 0.2s"
+                            _hover={{
+                              transform: 'translateY(-2px)',
+                              boxShadow: 'md',
+                            }}
+                            bg="white"
                           >
-                            <Text
-                              color="green.600"
-                              fontSize="2xl"
-                              fontWeight="bold"
-                            >
-                              ${item.price.toFixed(2)}
-                            </Text>
-                            <Button
-                              colorScheme="blue"
-                              onClick={() => addToCart(item)}
-                              size="sm"
-                              width="auto"
-                            >
-                              Add to Cart
-                            </Button>
-                          </Flex>
-                        </Flex>
-                      </Flex>
+                            <Flex direction="row">
+                              <Box 
+                                width="120px"
+                                height="120px"
+                                flexShrink={0}
+                                borderRadius="md"
+                                overflow="hidden"
+                              >
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  width="100%"
+                                  height="100%"
+                                  objectFit="cover"
+                                  cursor="pointer"
+                                  onClick={() => handleItemClick(item)}
+                                />
+                              </Box>
+
+                              <Flex 
+                                flex="1" 
+                                ml={4}
+                                direction="column"
+                                justify="space-between"
+                              >
+                                <Box>
+                                  <Heading size="sm" mb={1}>
+                                    {item.name}
+                                  </Heading>
+                                  <Text 
+                                    color="gray.600" 
+                                    noOfLines={2}
+                                    mb={2}
+                                    fontSize="sm"
+                                  >
+                                    {item.description}
+                                  </Text>
+                                </Box>
+
+                                <Flex 
+                                  justify="space-between" 
+                                  align="center"
+                                  mt="auto"
+                                >
+                                  <Text
+                                    color="green.600"
+                                    fontSize="2xl"
+                                    fontWeight="bold"
+                                  >
+                                    ${item.price.toFixed(2)}
+                                  </Text>
+                                  <Button
+                                    colorScheme="blue"
+                                    onClick={() => addToCart(item)}
+                                    size="sm"
+                                    width="auto"
+                                  >
+                                    Add to Cart
+                                  </Button>
+                                </Flex>
+                              </Flex>
+                            </Flex>
+                          </Box>
+                        ))}
+                      </VStack>
                     </Box>
-                  ))}
-                </VStack>
+                  ))
               )}
             </Box>
 
-            {/* Keep your existing Modal code */}
+            {/* Category Navigation */}
+            <CategoryNavigation />
+
+            {/* Existing Modal Code */}
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
               <ModalOverlay />
               <ModalContent>
