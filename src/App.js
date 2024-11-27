@@ -27,6 +27,7 @@ import ContactUs from './pages/utils/ContactUs';
 import HelpCenter from './pages/utils/HelpCenter';
 import PrivacyPolicy from './pages/utils/PrivacyPolicy';
 import TermsAndConditions from './pages/utils/TermsAndConditions';
+import LoadingScreen from './pages/utils/loading';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -78,9 +79,13 @@ function App() {
     <ChakraProvider>
       <BrowserRouter basename={process.env.PUBLIC_URL}>
         <ScrollToTop /> {/* Add the ScrollToTop component here */}
+        
+        <LoadingScreen>
         <Navbar />
         <Routes>
+        
           <Route path="/" element={<Home />} />
+        
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/order-waiting/:orderid" element={<OrderWaitingPage />} />
@@ -161,6 +166,7 @@ function App() {
           
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </LoadingScreen>
         <Footer/>
       </BrowserRouter>
     </ChakraProvider>
