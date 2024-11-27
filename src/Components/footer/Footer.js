@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -18,9 +19,8 @@ const Footer = () => {
     <Box 
       as="footer" 
       position="relative" 
-      mt={20}  // Added margin to show the rounded corners
+      mt={20}
     >
-      {/* Background with rounded corners */}
       <Box
         bg="orange.500"
         borderTopRadius="3xl"
@@ -29,9 +29,7 @@ const Footer = () => {
         overflow="hidden"
         px={4}
       >
-        {/* Main Footer Content */}
         <Container maxW="7xl" py={16}>
-          {/* Logo and Description */}
           <Flex 
             direction={{ base: 'column', lg: 'row' }}
             justify="space-between"
@@ -53,12 +51,11 @@ const Footer = () => {
                 fontSize="sm"
                 mt={4}
               >
-                Delivering happiness to your doorstep. Experience the best in food delivery
-                with carefully curated restaurants and lightning-fast service.
+                Connecting you with your favorite local food stalls. Order online, 
+                skip the line, and pick up your freshly prepared meal in minutes.
               </Text>
             </VStack>
             
-            {/* Social Media Icons */}
             <Stack 
               direction={{ base: 'row', md: 'row' }}
               spacing={4}
@@ -103,7 +100,6 @@ const Footer = () => {
             </Stack>
           </Flex>
 
-          {/* Footer Links */}
           <SimpleGrid 
             columns={{ base: 2, md: 4 }} 
             spacing={{ base: 8, md: 12 }}
@@ -113,33 +109,65 @@ const Footer = () => {
               <Text fontWeight="bold" fontSize="lg" mb={2}>
                 Company
               </Text>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
+              <Button 
+                as={RouterLink} 
+                to="/aboutus" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
                 About Us
               </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Team
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Careers
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Blog
-              </Button>
+              
             </VStack>
 
             <VStack align="flex-start" spacing={4}>
               <Text fontWeight="bold" fontSize="lg" mb={2}>
-                Contact
+                Support
               </Text>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Help & Support
+              <Button 
+                as={RouterLink} 
+                to="/helpcenter" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
+                Help Center
               </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Partner with Us
+              <Button 
+                as={RouterLink} 
+                to="/contactus" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
+                Contact Us
               </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Restaurants
+              
+            </VStack>
+
+            <VStack align="flex-start" spacing={4}>
+              <Text fontWeight="bold" fontSize="lg" mb={2}>
+                How It Works
+              </Text>
+              <Button 
+                as={RouterLink} 
+                to="/howitworks" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
+                Workflow
               </Button>
+              
             </VStack>
 
             <VStack align="flex-start" spacing={4}>
@@ -147,39 +175,15 @@ const Footer = () => {
                 Legal
               </Text>
               <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Terms
+                Terms of Service
               </Button>
               <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Privacy
+                Privacy Policy
               </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Cookies
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Licenses
-              </Button>
-            </VStack>
-
-            <VStack align="flex-start" spacing={4}>
-              <Text fontWeight="bold" fontSize="lg" mb={2}>
-                Delivery
-              </Text>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Pricing
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Restaurant Types
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Service Areas
-              </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                FAQs
-              </Button>
+              
             </VStack>
           </SimpleGrid>
 
-          {/* Bottom Section */}
           <Box 
             pt={8} 
             borderTopWidth={1} 
@@ -199,7 +203,7 @@ const Footer = () => {
                 fontSize="sm" 
                 textAlign={{ base: 'center', md: 'right' }}
               >
-                Made with ♥️ for food lovers worldwide
+                Connecting food lovers with local stalls
               </Text>
             </SimpleGrid>
           </Box>

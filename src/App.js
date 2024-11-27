@@ -21,6 +21,10 @@ import OrderPickupConfirmation from './Components/order/OrderConfirmation';
 import UserProfile from './pages/user/UserProfile';
 import VendorDashboard from './pages/vendors/workflow';
 import ScrollToTop from './pages/utils/ScrollToTop'; // Add this import
+import AboutUs from './pages/utils/AboutUs';
+import HowItWorks from './pages/utils/HowItWorks';
+import ContactUs from './pages/utils/ContactUs';
+import HelpCenter from './pages/utils/HelpCenter';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -80,6 +84,10 @@ function App() {
           <Route path="/order-waiting/:orderid" element={<OrderWaitingPage />} />
           <Route path="/order-confirmation" element={<OrderPickupConfirmation />} />
           <Route path="/Profile" element={<UserProfile />} />
+          <Route path="/AboutUs" element={<AboutUs />} />
+          <Route path="/HowItWorks" element={<HowItWorks />} />
+          <Route path="/Contactus" element={<ContactUs />} />
+          <Route path="/helpcenter" element={<HelpCenter />} />
           
           <Route 
             path="/vendor/dashboard" 
