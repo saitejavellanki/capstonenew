@@ -384,7 +384,7 @@ const Shop = () => {
                                     fontSize="2xl"
                                     fontWeight="bold"
                                   >
-                                    ${item.price.toFixed(2)}
+                                    Rs.{item.price.toFixed(2)}
                                   </Text>
                                   <Button
                                     colorScheme="blue"

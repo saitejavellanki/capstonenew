@@ -308,7 +308,7 @@ const Cart = () => {
                     <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
                       Total for {shopData.shopName}:
                       <Text as="span" color="green.600" ml={2}>
-                        ${shopData.total.toFixed(2)}
+                        Rs {shopData.total.toFixed(2)}
                       </Text>
                     </Text>
                     
