@@ -42,6 +42,8 @@ const Navbar = () => {
   const toast = useToast();
   
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const navBg = useColorModeValue('white', 'gray.800');
+  const navShadow = useColorModeValue('md', 'dark-lg');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -144,9 +146,6 @@ const Navbar = () => {
     }
   };
 
-  const navBg = useColorModeValue('white', 'gray.800');
-  const navShadow = useColorModeValue('md', 'dark-lg');
-
   const CartButton = () => (
     <Button
       leftIcon={<ShoppingCart size={20} />}
@@ -204,7 +203,7 @@ const Navbar = () => {
           {user?.role === 'vendor' && (
             <>
               <MenuItem onClick={() => {
-                navigate('/vendor/dashboard');  // Updated to match VendorDashboard route
+                navigate('/vendor/dashboard');
                 onClose();
               }}>
                 Vendor Dashboard
@@ -252,6 +251,29 @@ const Navbar = () => {
     </Flex>
   );
 
+  const NavLinks = () => (
+    <HStack spacing={4}>
+      <Button
+        variant="ghost"
+        onClick={() => {
+          navigate('/howitworks');
+          onClose();
+        }}
+      >
+        How It Works
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => {
+          navigate('/aboutus');
+          onClose();
+        }}
+      >
+        About Us
+      </Button>
+    </HStack>
+  );
+
   return (
     <>
       <Box
@@ -297,6 +319,7 @@ const Navbar = () => {
                   <DrawerHeader>Menu</DrawerHeader>
                   <DrawerBody>
                     <VStack spacing={4} align="stretch">
+                      <NavLinks />
                       {user ? (
                         <VStack spacing={4} align="stretch">
                           <Text fontWeight="medium">{user.email}</Text>
@@ -317,7 +340,7 @@ const Navbar = () => {
                           {user.role === 'vendor' && (
                             <>
                               <Button onClick={() => {
-                                navigate('/vendor/dashboard');  // Updated route
+                                navigate('/vendor/dashboard');
                                 onClose();
                               }} w="full">
                                 Vendor Dashboard
@@ -351,6 +374,7 @@ const Navbar = () => {
             </>
           ) : (
             <Flex align="center" gap={4}>
+              <NavLinks />
               <CartButton />
               {user ? <NavContent /> : <AuthButtons />}
             </Flex>

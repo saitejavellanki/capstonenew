@@ -25,6 +25,8 @@ import AboutUs from './pages/utils/AboutUs';
 import HowItWorks from './pages/utils/HowItWorks';
 import ContactUs from './pages/utils/ContactUs';
 import HelpCenter from './pages/utils/HelpCenter';
+import PrivacyPolicy from './pages/utils/PrivacyPolicy';
+import TermsAndConditions from './pages/utils/TermsAndConditions';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -88,6 +90,8 @@ function App() {
           <Route path="/HowItWorks" element={<HowItWorks />} />
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/helpcenter" element={<HelpCenter />} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy/>} />
+          <Route path="/termsandconditions" element={<TermsAndConditions />} />
           
           <Route 
             path="/vendor/dashboard" 

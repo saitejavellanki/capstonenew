@@ -174,10 +174,26 @@ const Footer = () => {
               <Text fontWeight="bold" fontSize="lg" mb={2}>
                 Legal
               </Text>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
-                Terms of Service
+              <Button 
+                as={RouterLink} 
+                to="/termsandconditions" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
+                Terms And Conditions
               </Button>
-              <Button variant="link" color="white" fontWeight="normal" fontSize="sm" _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}>
+              <Button 
+                as={RouterLink} 
+                to="/privacypolicy" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
                 Privacy Policy
               </Button>
               
