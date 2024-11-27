@@ -207,7 +207,7 @@ const Cart = () => {
           <VStack align="start" spacing={1}>
             <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>{item.name}</Text>
             <Text color="gray.600" fontSize={{ base: "sm", md: "md" }}>
-              ${item.price.toFixed(2)} each
+              RS {item.price.toFixed(2)} each
             </Text>
           </VStack>
   
@@ -241,7 +241,7 @@ const Cart = () => {
               minWidth={{ base: "60px", md: "80px" }}
               textAlign="right"
             >
-              ${(item.price * item.quantity).toFixed(2)}
+              Rs {(item.price * item.quantity).toFixed(2)}
             </Text>
             
             {/* Delete button */}
@@ -335,7 +335,7 @@ const Cart = () => {
               <Stack spacing={4}>
                 <Text>Shop: {selectedShop?.shopName}</Text>
                 <Text fontWeight="bold">
-                  Total Amount: ${selectedShop?.total.toFixed(2)}
+                  Total Amount: Rs {selectedShop?.total.toFixed(2)}
                 </Text>
                 
                 <PayPalButtons
