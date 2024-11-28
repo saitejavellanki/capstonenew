@@ -13,9 +13,7 @@ import {
   FormErrorMessage
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  createUserWithEmailAndPassword 
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { 
   doc, 
   setDoc, 
@@ -32,118 +30,97 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('customer');
   const [shopId, setShopId] = useState('');
-  const [shops, setShops] = useState([]);
+  const [availableShops, setAvailableShops] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [restrictions, setRestrictions] = useState({
     adminExists: false,
-    shopVendorMap: {}
+    takenShops: new Set()
   });
 
   const toast = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkRegistrationConstraints = async () => {
+    const loadRegistrationData = async () => {
       try {
-        const usersRef = collection(firestore, 'users');
-        
         // Check admin existence
-        const adminQuery = query(usersRef, where('role', '==', 'admin'));
-        const adminSnapshot = await getDocs(adminQuery);
+        const adminSnapshot = await getDocs(
+          query(collection(firestore, 'users'), where('role', '==', 'admin'))
+        );
         
-        // Check vendor-shop mapping
-        const vendorQuery = query(usersRef, where('role', '==', 'vendor'));
-        const vendorSnapshot = await getDocs(vendorQuery);
+        // Get all vendors and their shops
+        const vendorSnapshot = await getDocs(
+          query(collection(firestore, 'users'), where('role', '==', 'vendor'))
+        );
         
-        const shopVendorMap = {};
+        const takenShops = new Set();
         vendorSnapshot.forEach(doc => {
-          const vendorData = doc.data();
-          if (vendorData.shopId) {
-            shopVendorMap[vendorData.shopId] = true;
-          }
+          const { shopId } = doc.data();
+          if (shopId) takenShops.add(shopId);
         });
 
         setRestrictions({
           adminExists: !adminSnapshot.empty,
-          shopVendorMap
+          takenShops
         });
+
+        // Load available shops
+        const shopsSnapshot = await getDocs(collection(firestore, 'shops'));
+        const shops = shopsSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .filter(shop => !takenShops.has(shop.id));
+        
+        setAvailableShops(shops);
       } catch (error) {
-        console.error('Error checking registration constraints:', error);
+        console.error('Error loading registration data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load registration data',
+          status: 'error',
+          duration: 3000,
+        });
       }
     };
 
-    const fetchShops = async () => {
-      const shopsRef = collection(firestore, 'shops');
-      const snapshot = await getDocs(shopsRef);
-      const availableShops = snapshot.docs
-        .filter(doc => !restrictions.shopVendorMap[doc.id])
-        .map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      setShops(availableShops);
-    };
-
-    checkRegistrationConstraints();
-    fetchShops();
-  }, []);
+    loadRegistrationData();
+  }, [toast]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setPasswordError('');
     setIsLoading(true);
 
-    // Password validation
-    if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    // Role-specific validations
-    if (role === 'admin' && restrictions.adminExists) {
-      toast({
-        title: 'Registration Restricted',
-        description: 'An admin already exists',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (role === 'vendor' && restrictions.shopVendorMap[shopId]) {
-      toast({
-        title: 'Registration Restricted',
-        description: 'A vendor already exists for this shop',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (role === 'vendor' && !shopId) {
-      toast({
-        title: 'Shop Selection Required',
-        description: 'Please select a shop',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // Validation checks
+      if (password !== confirmPassword) {
+        setPasswordError('Passwords do not match');
+        return;
+      }
 
-      const userDocRef = doc(firestore, 'users', user.uid);
-      await setDoc(userDocRef, {
+      if (role === 'admin' && restrictions.adminExists) {
+        throw new Error('An admin already exists');
+      }
+
+      if (role === 'vendor') {
+        if (!shopId) {
+          throw new Error('Please select a shop');
+        }
+        if (restrictions.takenShops.has(shopId)) {
+          throw new Error('This shop already has a vendor');
+        }
+      }
+
+      // Create user
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Store user data
+      await setDoc(doc(firestore, 'users', user.uid), {
         email: user.email,
-        role: role,
+        role,
         shopId: role === 'vendor' ? shopId : null,
         createdAt: new Date()
       });
@@ -152,26 +129,18 @@ const Register = () => {
         title: 'Registration Successful',
         status: 'success',
         duration: 3000,
-        isClosable: true,
       });
 
-      switch(role) {
-        case 'admin':
-          navigate('/admin/shops');
-          break;
-        case 'vendor':
-          navigate('/vendor/items');
-          break;
-        default:
-          navigate('/');
-      }
+      // Navigate based on role
+      navigate(role === 'admin' ? '/admin/shops' : 
+              role === 'vendor' ? '/vendor/items' : '/');
+
     } catch (error) {
       toast({
         title: 'Registration Error',
         description: error.message,
         status: 'error',
         duration: 3000,
-        isClosable: true,
       });
     } finally {
       setIsLoading(false);
@@ -181,9 +150,7 @@ const Register = () => {
   return (
     <Flex justify="center" align="center" h="100vh" bg="gray.100">
       <Box w="400px" p={8} borderWidth={1} borderRadius="lg" boxShadow="lg" bg="white">
-        <Heading mb={4} fontWeight="bold" fontSize="2xl">
-          Register
-        </Heading>
+        <Heading mb={4} fontWeight="bold" fontSize="2xl">Register</Heading>
         <form onSubmit={handleRegister}>
           <FormControl mb={4}>
             <Input
@@ -196,6 +163,7 @@ const Register = () => {
               height="50px"
             />
           </FormControl>
+
           <FormControl mb={4} isInvalid={!!passwordError}>
             <Input
               type="password"
@@ -208,6 +176,7 @@ const Register = () => {
               height="50px"
             />
           </FormControl>
+
           <FormControl mb={4} isInvalid={!!passwordError}>
             <Input
               type="password"
@@ -232,7 +201,7 @@ const Register = () => {
           >
             <option value="customer">Customer</option>
             {!restrictions.adminExists && <option value="admin">Admin</option>}
-            <option value="vendor">Vendor</option>
+            {availableShops.length > 0 && <option value="vendor">Vendor</option>}
           </Select>
 
           {role === 'vendor' && (
@@ -241,8 +210,9 @@ const Register = () => {
               placeholder="Select Your Shop"
               value={shopId}
               onChange={(e) => setShopId(e.target.value)}
+              required
             >
-              {shops.map(shop => (
+              {availableShops.map(shop => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
                 </option>
@@ -263,6 +233,7 @@ const Register = () => {
             Register
           </Button>
         </form>
+
         <Text mt={4} textAlign="center">
           Already Have an account? <Link href="/login" color="blue.500" fontWeight="bold">Login</Link>
         </Text>
