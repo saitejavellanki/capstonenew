@@ -112,18 +112,6 @@ const Register = () => {
       return;
     }
 
-    if (role === 'vendor' && restrictions.shopVendorMap[shopId]) {
-      toast({
-        title: 'Registration Restricted',
-        description: 'A vendor already exists for this shop',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
-    }
-
     if (role === 'vendor' && !shopId) {
       toast({
         title: 'Shop Selection Required',
