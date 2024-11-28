@@ -28,6 +28,8 @@ import HelpCenter from './pages/utils/HelpCenter';
 import PrivacyPolicy from './pages/utils/PrivacyPolicy';
 import TermsAndConditions from './pages/utils/TermsAndConditions';
 import LoadingScreen from './pages/utils/loading';
+// import FostPolicyPage from './pages/utils/Refund';
+import CancellationPolicy from './pages/utils/Refund';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -97,7 +99,7 @@ function App() {
           <Route path="/helpcenter" element={<HelpCenter />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy/>} />
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
-          
+          <Route path="/refund" element={<CancellationPolicy />} />
           <Route 
             path="/vendor/dashboard" 
             element={

@@ -13,9 +13,24 @@ import {
   InputGroup,
   InputLeftElement,
   Input,
-  Icon
+  Icon,
+  Button,
+  Flex,
+  Link,
+  Alert,
+  AlertIcon
 } from '@chakra-ui/react';
-import { FaSearch, FaQuestionCircle, FaShoppingCart, FaUser, FaCreditCard } from 'react-icons/fa';
+import { 
+  FaSearch, 
+  FaQuestionCircle, 
+  FaShoppingCart, 
+  FaUser, 
+  FaCreditCard,
+  FaEnvelope,
+  FaPhoneAlt,
+  FaDesktop,
+  FaGlobe
+} from 'react-icons/fa';
 
 const HelpCenter = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,15 +38,19 @@ const HelpCenter = () => {
   const faqCategories = [
     {
       category: 'Getting Started',
-      icon: FaQuestionCircle,
+      icon: FaDesktop,
       faqs: [
         {
           question: 'How do I create an account?',
-          answer: 'Creating an account is easy! Click on the "Sign Up" button, fill in your details, and verify your email address.'
+          answer: 'Creating an account on FOST is simple! Navigate to the "Sign Up" page on our website, fill in your details with a valid email address, and verify your account through the confirmation email sent to you.'
         },
         {
-          question: 'Is the app free to use?',
-          answer: 'The FOST app is free to use. We only charge for the meals you order.'
+          question: 'Is the platform free to use?',
+          answer: 'FOST is free to use. We only charge for the meals you order. There are no hidden fees or subscription costs. Browse, order, and enjoy your favorite food stall meals!'
+        },
+        {
+          question: 'What browsers are supported?',
+          answer: 'FOST is a web-based platform compatible with modern browsers. We recommend using the latest versions of Google Chrome, Mozilla Firefox, Safari, or Microsoft Edge for the best experience.'
         }
       ]
     },
@@ -41,11 +60,15 @@ const HelpCenter = () => {
       faqs: [
         {
           question: 'How do I place an order?',
-          answer: 'Browse local food stalls, select your items, customize if needed, and proceed to checkout. It\'s that simple!'
+          answer: 'Browse food stalls on our website, select your desired items, customize your order if needed (add special instructions or note dietary requirements), review your selection, and proceed to checkout. You can track your order status in real-time through our web platform.'
         },
         {
           question: 'Can I cancel an order?',
-          answer: 'Orders can be canceled before the stall starts preparing your meal. Check the specific cancellation policy in the app.'
+          answer: 'Orders can be canceled before the stall starts preparing your meal. Once preparation begins, cancellation is not possible. Please refer to our detailed Cancellation Policy for specific guidelines.'
+        },
+        {
+          question: 'How do I track my order?',
+          answer: 'After placing an order, you can track its status in real-time on our website. The platform provides updates from order confirmation to preparation and when it\'s ready for pickup. You\'ll receive on-screen notifications at each stage.'
         }
       ]
     },
@@ -53,10 +76,13 @@ const HelpCenter = () => {
       category: 'Account Management',
       icon: FaUser,
       faqs: [
-        
         {
           question: 'How do I reset my password?',
-          answer: 'Click "Forgot Password" on the login screen, enter your email, and follow the reset instructions.'
+          answer: 'Click "Forgot Password" on the login page, enter your registered email address, and follow the password reset instructions sent to your email. If you encounter any issues, contact our support team.'
+        },
+        {
+          question: 'Can I update my profile information?',
+          answer: 'Yes, you can update your profile details by navigating to the "Account Settings" section on our website. Here you can modify your contact information, preferences, and other account-related details.'
         }
       ]
     },
@@ -64,10 +90,13 @@ const HelpCenter = () => {
       category: 'Payments',
       icon: FaCreditCard,
       faqs: [
-        
         {
           question: 'Is my payment information secure?',
-          answer: 'Yes, we use industry-standard encryption to protect your payment information.'
+          answer: 'We use industry-standard encryption and secure payment gateways to protect your financial information. All transactions are processed through trusted and verified payment processors.'
+        },
+        {
+          question: 'What payment methods are accepted?',
+          answer: 'FOST supports multiple payment methods including credit/debit cards, net banking, UPI, and digital wallets. Choose the most convenient option during checkout.'
         }
       ]
     }
@@ -170,6 +199,28 @@ const HelpCenter = () => {
               </Text>
             </Box>
           )}
+
+          <Alert 
+            status="info" 
+            variant="subtle" 
+            borderRadius="xl" 
+            mb={6}
+          >
+            <AlertIcon />
+            <Box>
+              <Text fontWeight="bold">Need More Help?</Text>
+              <Text>
+                Our support team is ready to assist you. Reach out via email at{' '}
+                <Link 
+                  href="mailto:team@thefost.com" 
+                  color="orange.500" 
+                  fontWeight="bold"
+                >
+                  team@thefost.com
+                </Link>
+              </Text>
+            </Box>
+          </Alert>
         </VStack>
       </Container>
     </Box>

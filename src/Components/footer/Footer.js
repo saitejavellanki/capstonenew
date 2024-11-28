@@ -196,6 +196,17 @@ const Footer = () => {
               >
                 Privacy Policy
               </Button>
+              <Button 
+                as={RouterLink} 
+                to="/refund" 
+                variant="link" 
+                color="white" 
+                fontWeight="normal" 
+                fontSize="sm" 
+                _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
+              >
+                Cancellation and Refund Policy.
+              </Button>
               
             </VStack>
           </SimpleGrid>

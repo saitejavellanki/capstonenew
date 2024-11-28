@@ -142,7 +142,7 @@ const ContactUs = () => {
           >
             <Box mb={{ base: 4, md: 0 }}>
               <Text fontWeight="bold" color="gray.700">Customer Support</Text>
-              <Text color="gray.600">team@placeus.in</Text>
+              <Text color="gray.600">team@thefost.com</Text>
             </Box>
             {/* <Box>
               <Text fontWeight="bold" color="gray.700">Phone</Text>
