@@ -12,16 +12,24 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@yudiel/react-qr-scanner": "^2.0.8",
+    "assert": "^2.1.0",
     "axios": "^1.7.7",
+    "buffer": "^6.0.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "crypto-browserify": "^3.12.1",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "firebase": "^10.13.0",
     "framer-motion": "^11.3.28",
+    "https-browserify": "^1.0.0",
     "lucide-react": "^0.460.0",
     "mongoose": "^8.7.1",
     "node-fetch": "^3.3.2",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10",
     "qrcode.react": "^4.1.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
@@ -32,6 +40,9 @@
     "react-slick": "^0.30.2",
     "react-toastify": "^10.0.5",
     "slick-carousel": "^1.8.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.4",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
@@ -63,5 +74,8 @@
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "react-app-rewired": "^2.2.1"
+  }
 }

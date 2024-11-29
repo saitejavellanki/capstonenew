@@ -24,21 +24,26 @@ import {
   IconButton,
   useBreakpointValue
 } from '@chakra-ui/react';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
 const Cart = () => {
-  // ... (previous state management code remains the same)
   const [cartItems, setCartItems] = useState([]);
   const [groupedItems, setGroupedItems] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedShop, setSelectedShop] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
+ 
   const toast = useToast();
   const firestore = getFirestore();
   const navigate = useNavigate();
+
+  // PayU Configuration
+  const PAYU_MERCHANT_KEY = '1ALAs0';
+  // const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
+  const PAYU_BASE_URL = 'https://test.payu.in/_payment'; // Use test URL for sandbox
 
   const isMobile = useBreakpointValue({ base: true, md: false });
   const containerPadding = useBreakpointValue({ base: 4, md: 8 });
@@ -69,7 +74,6 @@ const Cart = () => {
     loadCart();
   }, []);
 
-  // Existing helper functions remain the same...
   const removeFromCart = (itemId) => {
     const updatedCart = cartItems.filter(item => item.id !== itemId);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
@@ -122,6 +126,85 @@ const Cart = () => {
   const handlePlaceOrder = async (shopId, shopData) => {
     setSelectedShop({ id: shopId, ...shopData });
     onOpen();
+  };
+
+  const generatePayUHash = (params) => {
+    // const PAYU_MERCHANT_KEY = '1ALAs0';
+    const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
+  
+    // Ensure all parameters are in the correct order and include empty strings for missing optional fields
+    const hashString = `${params.key}|${params.txnid}|${params.amount}|${params.productinfo}|${params.firstname}|${params.email}|||||||||||${PAYU_SALT_KEY}`;
+  
+    // Use SHA-512 to generate the hash
+    const hash = CryptoJS.SHA512(hashString).toString(CryptoJS.enc.Hex);
+    
+    return hash;
+  };
+
+  const initiatePayUPayment = async (shopData) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const txnid = `TXN_${Date.now()}`;
+    
+    const paymentParams = {
+      key: PAYU_MERCHANT_KEY,
+      txnid: txnid,
+      amount: shopData.total.toFixed(2),
+      productinfo: `Order for ${shopData.shopName}`,
+      firstname: user.displayName || 'Customer',
+      email: user.email,
+      phone: user.phoneNumber || '',
+      surl: `${window.location.origin}/payment-success`,
+      furl: `${window.location.origin}/payment-failure`,
+    };
+
+    // Generate hash
+    paymentParams.hash = generatePayUHash(paymentParams);
+
+    // Create Firestore order with pending status
+    const orderData = {
+      shopId: shopData.id,
+      userId: user.uid,
+      shopName: shopData.shopName,
+      items: shopData.items,
+      total: shopData.total,
+      status: 'pending',
+      paymentStatus: 'pending',
+      customerEmail: user.email,
+      createdAt: new Date(),
+      txnid: txnid
+    };
+
+    try {
+      const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
+      
+      // Redirect to PayU payment page
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = PAYU_BASE_URL;
+
+      // Add all payment parameters as hidden inputs
+      Object.keys(paymentParams).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = paymentParams[key];
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+
+      return newDocRef.id;
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to place order. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return null;
+    }
   };
 
   const createFirestoreOrder = async (shopData, paymentDetails = null) => {
@@ -180,8 +263,6 @@ const Cart = () => {
       </Container>
     );
   }
-
-  // ... (previous useEffect and helper functions remain the same)
 
   const CartItem = ({ item }) => (
     <Box width="100%">
@@ -272,121 +353,83 @@ const Cart = () => {
   }
 
   return (
-    <PayPalScriptProvider options={{ 
-      "client-id": "AVTeeus2wvd60vB9WOro8-DvPiuAcOhexem573MyZHhf3mwQqmmia-6BOP9RRcl233fircUuUrECeXBl",
-      currency: "GBP"
-    }}>
-      <Container maxW="container.xl" py={containerPadding}>
-        <VStack spacing={6} align="stretch">
-          <Heading size={{ base: "lg", md: "xl" }}>Shopping Cart</Heading>
+    <Container maxW="container.xl" py={containerPadding}>
+      <VStack spacing={6} align="stretch">
+        <Heading size={{ base: "lg", md: "xl" }}>Shopping Cart</Heading>
 
-          {Object.entries(groupedItems).map(([shopId, shopData]) => (
-            <Box 
-              key={shopId}
-              borderWidth="1px"
-              borderRadius="lg"
-              p={{ base: 4, md: 6 }}
-              bg="white"
-              shadow="sm"
-            >
-              <Heading size={{ base: "md", md: "lg" }} mb={4}>
-                {shopData.shopName}
-              </Heading>
+        {Object.entries(groupedItems).map(([shopId, shopData]) => (
+          <Box 
+            key={shopId}
+            borderWidth="1px"
+            borderRadius="lg"
+            p={{ base: 4, md: 6 }}
+            bg="white"
+            shadow="sm"
+          >
+            <Heading size={{ base: "md", md: "lg" }} mb={4}>
+              {shopData.shopName}
+            </Heading>
+            
+            <VStack spacing={4} align="stretch">
+              {shopData.items.map((item) => (
+                <CartItem key={item.id} item={item} />
+              ))}
               
-              <VStack spacing={4} align="stretch">
-                {shopData.items.map((item) => (
-                  <CartItem key={item.id} item={item} />
-                ))}
-                
-                <Box pt={4}>
-                  <Flex 
-                    direction={{ base: "column", md: "row" }}
-                    justify="space-between"
-                    align={{ base: "stretch", md: "center" }}
-                    gap={4}
-                  >
-                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
-                      Total for {shopData.shopName}:
-                      <Text as="span" color="green.600" ml={2}>
-                        Rs {shopData.total.toFixed(2)}
-                      </Text>
+              <Box pt={4}>
+                <Flex 
+                  direction={{ base: "column", md: "row" }}
+                  justify="space-between"
+                  align={{ base: "stretch", md: "center" }}
+                  gap={4}
+                >
+                  <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
+                    Total for {shopData.shopName}:
+                    <Text as="span" color="green.600" ml={2}>
+                      Rs {shopData.total.toFixed(2)}
                     </Text>
-                    
-                    <Button
-                      colorScheme="blue"
-                      size={{ base: "md", md: "lg" }}
-                      width={{ base: "full", md: "auto" }}
-                      onClick={() => handlePlaceOrder(shopId, shopData)}
-                    >
-                      Place Order
-                    </Button>
-                  </Flex>
-                </Box>
-              </VStack>
-            </Box>
-          ))}
-        </VStack>
+                  </Text>
+                  
+                  <Button
+                    colorScheme="blue"
+                    size={{ base: "md", md: "lg" }}
+                    width={{ base: "full", md: "auto" }}
+                    onClick={() => handlePlaceOrder(shopId, shopData)}
+                  >
+                    Place Order
+                  </Button>
+                </Flex>
+              </Box>
+            </VStack>
+          </Box>
+        ))}
+      </VStack>
 
-        <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }}>
-          <ModalOverlay />
-          <ModalContent margin={{ base: 0, md: "auto" }}>
-            <ModalHeader>Confirm Order and Pay</ModalHeader>
-            <ModalBody>
-              <Stack spacing={4}>
-                <Text>Shop: {selectedShop?.shopName}</Text>
-                <Text fontWeight="bold">
-                  Total Amount: Rs {selectedShop?.total.toFixed(2)}
-                </Text>
-                
-                <PayPalButtons
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      purchase_units: [{
-                        amount: {
-                          value: selectedShop?.total.toFixed(2)
-                        }
-                      }]
-                    });
-                  }}
-                  onApprove={async (data, actions) => {
-                    const details = await actions.order.capture();
-                    const orderId = await createFirestoreOrder(selectedShop, {
-                      orderID: details.id,
-                      payerID: details.payer.payer_id,
-                      status: details.status
-                    });
-
-                    if (orderId) {
-                      toast({
-                        title: 'Payment Successful',
-                        description: 'Your payment has been processed',
-                        status: 'success',
-                        duration: 3000,
-                        isClosable: true,
-                      });
-                      setShowFeedback(true);
-                    }
-                  }}
-                  onError={(err) => {
-                    toast({
-                      title: 'Payment Error',
-                      description: 'There was an issue processing your payment',
-                      status: 'error',
-                      duration: 3000,
-                      isClosable: true,
-                    });
-                    console.error('PayPal Error:', err);
-                  }}
-                />
-              </Stack>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </Container>
-    </PayPalScriptProvider>
+      <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }}>
+        <ModalOverlay />
+        <ModalContent margin={{ base: 0, md: "auto" }}>
+          <ModalHeader>Confirm Order and Pay</ModalHeader>
+          <ModalBody>
+            <Stack spacing={4}>
+              <Text>Shop: {selectedShop?.shopName}</Text>
+              <Text fontWeight="bold">
+                Total Amount: Rs {selectedShop?.total.toFixed(2)}
+              </Text>
+              
+              <Button 
+                colorScheme="blue" 
+                onClick={() => initiatePayUPayment(selectedShop)}
+                width="full"
+              >
+                Proceed to PayU Payment
+              </Button>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Container>
   );
 };
 
