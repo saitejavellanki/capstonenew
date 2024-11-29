@@ -144,7 +144,22 @@ const Cart = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const txnid = `TXN_${Date.now()}`;
     
-    // First, create the order in Firestore to get the order ID
+    const paymentParams = {
+      key: PAYU_MERCHANT_KEY,
+      txnid: txnid,
+      amount: shopData.total.toFixed(2),
+      productinfo: `Order for ${shopData.shopName}`,
+      firstname: user.displayName || 'Customer',
+      email: user.email,
+      phone: user.phoneNumber || '',
+      surl: `${window.location.origin}/payment-success`,
+      furl: `${window.location.origin}/payment-failure`,
+    };
+
+    // Generate hash
+    paymentParams.hash = generatePayUHash(paymentParams);
+
+    // Create Firestore order with pending status
     const orderData = {
       shopId: shopData.id,
       userId: user.uid,
@@ -157,32 +172,15 @@ const Cart = () => {
       createdAt: new Date(),
       txnid: txnid
     };
-  
+
     try {
-      // Create the order first to get the order ID
       const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
-      const orderId = newDocRef.id;
-  
-      const paymentParams = {
-        key: PAYU_MERCHANT_KEY,
-        txnid: txnid,
-        amount: shopData.total.toFixed(2),
-        productinfo: `Order for ${shopData.shopName}`,
-        firstname: user.displayName || 'Customer',
-        email: user.email,
-        phone: user.phoneNumber || '',
-        surl: `${window.location.origin}/order-waiting/${orderId}`, // Use order ID here
-        furl: `${window.location.origin}/payment-failure`,
-      };
-  
-      // Generate hash
-      paymentParams.hash = generatePayUHash(paymentParams);
-  
+      
       // Redirect to PayU payment page
       const form = document.createElement('form');
       form.method = 'post';
       form.action = 'https://secure.payu.in/_payment';
-  
+
       // Add all payment parameters as hidden inputs
       Object.keys(paymentParams).forEach(key => {
         const input = document.createElement('input');
@@ -191,11 +189,11 @@ const Cart = () => {
         input.value = paymentParams[key];
         form.appendChild(input);
       });
-  
+
       document.body.appendChild(form);
       form.submit();
-  
-      return orderId;
+
+      return newDocRef.id;
     } catch (error) {
       toast({
         title: 'Error',
