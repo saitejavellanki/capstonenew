@@ -41,9 +41,9 @@ const Cart = () => {
   const navigate = useNavigate();
 
   // PayU Configuration
-  const PAYU_MERCHANT_KEY = '1ALAs0';
+  const PAYU_MERCHANT_KEY = 'gSR07M';
   // const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
-  const PAYU_BASE_URL = 'https://test.payu.in/_payment'; // Use test URL for sandbox
+  const PAYU_BASE_URL = 'https://secure.payu.in/_payment'; // Use test URL for sandbox
 
   const isMobile = useBreakpointValue({ base: true, md: false });
   const containerPadding = useBreakpointValue({ base: 4, md: 8 });
@@ -130,7 +130,7 @@ const Cart = () => {
 
   const generatePayUHash = (params) => {
     // const PAYU_MERCHANT_KEY = '1ALAs0';
-    const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
+    const PAYU_SALT_KEY = '79o46uUZByi63FCtJlwhh9dR3XOVKGqh';
   
     // Ensure all parameters are in the correct order and include empty strings for missing optional fields
     const hashString = `${params.key}|${params.txnid}|${params.amount}|${params.productinfo}|${params.firstname}|${params.email}|||||||||||${PAYU_SALT_KEY}`;
@@ -180,7 +180,7 @@ const Cart = () => {
       // Redirect to PayU payment page
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = PAYU_BASE_URL;
+      form.action = 'https://secure.payu.in/_payment';
 
       // Add all payment parameters as hidden inputs
       Object.keys(paymentParams).forEach(key => {
