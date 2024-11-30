@@ -30,6 +30,7 @@ import TermsAndConditions from './pages/utils/TermsAndConditions';
 import LoadingScreen from './pages/utils/loading';
 // import FostPolicyPage from './pages/utils/Refund';
 import CancellationPolicy from './pages/utils/Refund';
+import PaymentSuccess from './pages/utils/PaymentSuccess';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -100,6 +101,7 @@ function App() {
           <Route path="/privacypolicy" element={<PrivacyPolicy/>} />
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
           <Route path="/refund" element={<CancellationPolicy />} />
+          <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
           <Route 
             path="/vendor/dashboard" 
             element={
