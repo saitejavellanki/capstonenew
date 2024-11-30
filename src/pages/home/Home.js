@@ -252,7 +252,7 @@ const Home = () => {
           id: doc.id,
           ...doc.data(),
           rating: doc.data().rating || 4.0,
-          estimatedDeliveryTime: doc.data().estimatedDeliveryTime || 30
+          
         }));
 
         setPopularShops(shops);
