@@ -171,8 +171,8 @@ const Cart = () => {
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: `${window.location.origin}/order-waiting/${orderId}`, // Use order ID here
-        furl: `${window.location.origin}/payment-failure`,
+        surl: 'http://localhost:5001/payment-success', // Use order ID here
+        furl: 'http://localhost:5001/payment-success',
       };
   
       // Generate hash
