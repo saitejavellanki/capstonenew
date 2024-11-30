@@ -33,19 +33,13 @@ const Reset = () => {
     setResetSuccess('');
 
     try {
-      // Validate email
       if (!email) {
         setResetError('Please enter your email address');
         return;
       }
-
-      // Send password reset email
       await sendPasswordResetEmail(auth, email);
-
-      // Set success message
       setResetSuccess('Password reset link sent to your email. Check your inbox.');
       
-      // Show toast notification
       toast({
         title: 'Password Reset',
         description: 'Password reset link sent successfully',
@@ -57,7 +51,6 @@ const Reset = () => {
     } catch (error) {
       console.error('Password reset error:', error);
       
-      // Specific error handling
       switch(error.code) {
         case 'auth/invalid-email':
           setResetError('Invalid email address');
