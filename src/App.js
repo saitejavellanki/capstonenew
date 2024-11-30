@@ -31,6 +31,7 @@ import LoadingScreen from './pages/utils/loading';
 // import FostPolicyPage from './pages/utils/Refund';
 import CancellationPolicy from './pages/utils/Refund';
 import PaymentSuccess from './pages/utils/PaymentSuccess';
+import Reset from './pages/Auth/Reset';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -81,16 +82,16 @@ function App() {
   return (
     <ChakraProvider>
       <BrowserRouter basename={process.env.PUBLIC_URL}>
-        <ScrollToTop /> {/* Add the ScrollToTop component here */}
+        <ScrollToTop /> 
         
         <LoadingScreen>
         <Navbar />
         <Routes>
         
           <Route path="/" element={<Home />} />
-        
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<Reset />} />
           <Route path="/order-waiting/:orderid" element={<OrderWaitingPage />} />
           <Route path="/order-confirmation" element={<OrderPickupConfirmation />} />
           <Route path="/Profile" element={<UserProfile />} />

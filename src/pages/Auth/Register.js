@@ -147,6 +147,10 @@ const Register = () => {
     }
   };
 
+  const handleLogin = () =>{
+    navigate('/login');
+  }
+
   return (
     <Flex justify="center" align="center" h="100vh" bg="gray.100">
       <Box w="400px" p={8} borderWidth={1} borderRadius="lg" boxShadow="lg" bg="white">
@@ -235,7 +239,16 @@ const Register = () => {
         </form>
 
         <Text mt={4} textAlign="center">
-          Already Have an account? <Link href="/login" color="blue.500" fontWeight="bold">Login</Link>
+        Already Have an account? 
+        <Link 
+          onClick={handleLogin} 
+          color="blue.500" 
+          fontWeight="bold" 
+          ml={2}
+          cursor="pointer"
+        >
+          Login
+        </Link>
         </Text>
       </Box>
     </Flex>
