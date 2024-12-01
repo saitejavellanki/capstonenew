@@ -55,7 +55,19 @@ const FOOD_CATEGORIES = [
   "Soups",
   "Fast Food",
   "Street Food",
-  "Healthy Options"
+  "Healthy Options",
+  "Milkshake Bites",
+  "Slushy Splash",
+  "Fruit-A-List",
+  "Ice Colas",
+  "Mojitos",
+  "Ba..Ba..Banana",
+  "We are Oreons",
+  "Chocolate Factory",
+  "Tipsy Thickshakes",
+  "Brownie Bros",
+  "Nutella Ninjas",
+  "Protein Shakes"
 ];
 
 const VendorItems = () => {
