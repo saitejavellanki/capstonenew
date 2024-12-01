@@ -124,26 +124,10 @@ const Cart = () => {
   };
 
   const generatePayUHash = (params) => {
-    // Ensure all required parameters are present and in the correct order
-    const requiredParams = [
-      'key', 'txnid', 'amount', 'productinfo', 'firstname', 'email', 
-      'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 
-      '', '', '', '', '', ''
-    ];
-
-    // Create an array of parameter values in the specific order PayU expects
-    const paramValues = requiredParams.map(param => {
-      if (param === '') return '';
-      return params[param] || '';
-    });
-
-    // Add salt key at the end
-    paramValues.push(PAYU_SALT_KEY);
-
-    // Join all parameters with '|'
-    const hashString = paramValues.join('|');
-
-    // Generate SHA-512 hash
+    // Ensure consistent order of parameters
+    const hashString = `${params.key}|${params.txnid}|${params.amount}|${params.productinfo}|${params.firstname}|${params.email}|||||||||||${PAYU_SALT_KEY}`;
+  
+    // Use SHA-512 to generate the hash
     const hash = CryptoJS.SHA512(hashString).toString(CryptoJS.enc.Hex);
     
     return hash;
@@ -201,11 +185,7 @@ const Cart = () => {
         phone: user.phoneNumber || '',
         surl: `https://your-backend-domain.com/payment-success`, 
         furl: `https://your-backend-domain.com/payment-failed`,
-        udf1: orderId,  // Pass order ID as a user-defined field
-        udf2: '',
-        udf3: '',
-        udf4: '',
-        udf5: ''
+        udf1: orderId  // Pass order ID as a user-defined field
       };
   
       // Generate hash
