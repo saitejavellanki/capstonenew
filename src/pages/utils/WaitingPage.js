@@ -17,7 +17,14 @@ import {
   ModalContent,
   ModalHeader,
   ModalCloseButton,
-  ModalBody
+  ModalBody,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  TableContainer
 } from '@chakra-ui/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -172,6 +179,65 @@ const OrderWaitingPage = () => {
     }
   };
 
+  const renderBillDetails = () => {
+    if (!orderDetails || !orderDetails.items) return null;
+
+    const subtotal = orderDetails.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const tax = orderDetails.tax || 0;
+    const total = subtotal + tax;
+
+    return (
+      <Box 
+        bg="white" 
+        p={6} 
+        borderRadius="lg" 
+        boxShadow="md" 
+        mt={4}
+      >
+        <Heading size="md" mb={4} textAlign="center">
+          Order Details
+        </Heading>
+        <TableContainer>
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>Item</Th>
+                <Th isNumeric>Quantity</Th>
+                <Th isNumeric>Price</Th>
+                <Th isNumeric>Total</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {orderDetails.items.map((item, index) => (
+                <Tr key={index}>
+                  <Td>{item.name}</Td>
+                  <Td isNumeric>{item.quantity}</Td>
+                  <Td isNumeric>₹{item.price.toFixed(2)}</Td>
+                  <Td isNumeric>₹{(item.price * item.quantity).toFixed(2)}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
+        
+        <Box mt={4} borderTop="1px solid" borderColor="gray.200" pt={4}>
+          <Flex justify="space-between" mb={2}>
+            <Text>Subtotal</Text>
+            <Text>₹{subtotal.toFixed(2)}</Text>
+          </Flex>
+          <Flex justify="space-between" mb={2}>
+            <Text>Tax</Text>
+            <Text>₹{tax.toFixed(2)}</Text>
+          </Flex>
+          <Flex justify="space-between" fontWeight="bold">
+            <Text>Total</Text>
+            <Text>₹{total.toFixed(2)}</Text>
+          </Flex>
+        </Box>
+      </Box>
+    );
+  };
+
   // If not authorized, show unauthorized message
   if (!isAuthorized) {
     return (
@@ -236,6 +302,8 @@ const OrderWaitingPage = () => {
             {statusDetails.message}
           </Text>
         </Box>
+
+        {renderBillDetails()}
 
         {/* {isReadyForPickup && (
           // <Button 

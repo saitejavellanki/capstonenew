@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { 
   Container, 
   VStack, 
@@ -25,7 +24,7 @@ import {
   IconButton,
   useBreakpointValue
 } from '@chakra-ui/react';
-import { getFirestore, collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
@@ -144,8 +143,26 @@ const Cart = () => {
   const initiatePayUPayment = async (shopData) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const txnid = `TXN_${Date.now()}`;
+    
+    // First, create the order in Firestore to get the order ID
+    const orderData = {
+      shopId: shopData.id,
+      userId: user.uid,
+      shopName: shopData.shopName,
+      items: shopData.items,
+      total: shopData.total,
+      status: 'pending',
+      paymentStatus: 'pending',
+      customerEmail: user.email,
+      createdAt: new Date(),
+      txnid: txnid
+    };
   
     try {
+      
+      const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
+      const orderId = newDocRef.id;
+  
       const paymentParams = {
         key: PAYU_MERCHANT_KEY,
         txnid: txnid,
@@ -154,19 +171,19 @@ const Cart = () => {
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: 'https://fostserver.onrender.com/payment-success', 
-        furl: 'http://localhost:5001/payment-failure',
+        surl: 'https://fostserver.onrender.com/payment-success', // Use order ID here
+        furl: 'http://localhost:5001/payment-success',
       };
   
       // Generate hash
       paymentParams.hash = generatePayUHash(paymentParams);
   
-      // Create form and submit
+      // Redirect to PayU payment page
       const form = document.createElement('form');
       form.method = 'post';
       form.action = 'https://secure.payu.in/_payment';
   
-      // Add payment parameters as hidden inputs
+      // Add all payment parameters as hidden inputs
       Object.keys(paymentParams).forEach(key => {
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -175,172 +192,12 @@ const Cart = () => {
         form.appendChild(input);
       });
   
-      // Store shop data in local storage for order creation after payment
-      localStorage.setItem('pendingOrderData', JSON.stringify({
-        shopId: shopData.id,
-        shopName: shopData.shopName,
-        items: shopData.items,
-        total: shopData.total,
-        txnid: txnid
-      }));
-  
       document.body.appendChild(form);
       form.submit();
-  
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to initiate payment. Please try again.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // Add a useEffect or component to handle post-payment order creation
-  useEffect(() => {
-    const handlePaymentSuccess = async () => {
-      // Check if there's pending order data
-      const pendingOrderData = localStorage.getItem('pendingOrderData');
+
       
-      if (pendingOrderData) {
-        try {
-          // Verify payment status with your backend
-          const response = await axios.post('/verify-payment', { 
-            txnid: JSON.parse(pendingOrderData).txnid 
-          });
   
-          if (response.data.status === 'success') {
-            // Create order in Firestore
-            const user = JSON.parse(localStorage.getItem('user'));
-            const orderData = {
-              shopId: JSON.parse(pendingOrderData).shopId,
-              userId: user.uid,
-              shopName: JSON.parse(pendingOrderData).shopName,
-              items: JSON.parse(pendingOrderData).items,
-              total: JSON.parse(pendingOrderData).total,
-              status: 'confirmed',
-              paymentStatus: 'completed',
-              customerEmail: user.email,
-              createdAt: new Date(),
-              paymentDetails: response.data.paymentDetails
-            };
-  
-            // Add order to Firestore
-            const newOrderRef = await addDoc(collection(firestore, 'orders'), orderData);
-  
-            // Remove items from cart for this shop
-            const updatedCart = cartItems.filter(
-              item => item.shopId !== JSON.parse(pendingOrderData).shopId
-            );
-            localStorage.setItem('cart', JSON.stringify(updatedCart));
-            setCartItems(updatedCart);
-  
-            // Clear pending order data
-            localStorage.removeItem('pendingOrderData');
-  
-            // Navigate to order confirmation
-            navigate(`/order-confirmation/${newOrderRef.id}`);
-  
-            toast({
-              title: 'Order Placed',
-              description: 'Your order has been successfully processed.',
-              status: 'success',
-              duration: 3000,
-              isClosable: true,
-            });
-          }
-        } catch (error) {
-          toast({
-            title: 'Order Creation Failed',
-            description: 'There was an issue creating your order. Please contact support.',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-      }
-    };
-  
-    // Check for pending order on component mount
-    handlePaymentSuccess();
-  }, []);
-
-  // New method to verify and complete the order
-  const completeOrder = async (orderId, paymentDetails) => {
-    try {
-      // Update the existing order document
-      const orderRef = doc(firestore, 'orders', orderId);
-      
-      await updateDoc(orderRef, {
-        status: 'confirmed',
-        paymentStatus: 'completed',
-        paymentDetails: paymentDetails,
-        updatedAt: new Date()
-      });
-
-      // Remove items from cart for this shop
-      const updatedCart = cartItems.filter(item => item.shopId !== paymentDetails.shopId);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setCartItems(updatedCart);
-
-      toast({
-        title: 'Order Placed Successfully',
-        description: 'Your order has been confirmed and processed.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-
-      // Navigate to order confirmation or tracking page
-      navigate(`/order-confirmation/${orderId}`);
-
-    } catch (error) {
-      toast({
-        title: 'Order Completion Error',
-        description: 'There was an issue completing your order. Please contact support.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const createFirestoreOrder = async (shopData, paymentDetails = null) => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const orderData = {
-        shopId: shopData.id,
-        userId: user.uid,
-        shopName: shopData.shopName,
-        items: shopData.items,
-        total: shopData.total,
-        status: 'pending',
-        paymentStatus: paymentDetails ? 'completed' : 'pending',
-        customerEmail: user.email,
-        createdAt: new Date(),
-        paymentDetails: paymentDetails
-      };
-
-      const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
-
-      const updatedCart = cartItems.filter(item => item.shopId !== shopData.id);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setCartItems(updatedCart);
-
-      toast({
-        title: 'Order Placed Successfully',
-        description: 'Your order has been sent to the vendor',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-
-      navigate(`/order-waiting/${newDocRef.id}`);
-      onClose();
-
-      return newDocRef.id;
+      return orderId;
     } catch (error) {
       toast({
         title: 'Error',
@@ -352,6 +209,8 @@ const Cart = () => {
       return null;
     }
   };
+
+  
 
   if (cartItems.length === 0) {
     return (

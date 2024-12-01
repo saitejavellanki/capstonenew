@@ -196,7 +196,7 @@ const OrderCard = ({ order, onViewDetails }) => (
     >
       <VStack align={{ base: 'center', sm: 'start' }} spacing={2}>
         <Text fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
-          Order #{order.id.slice(-6)}
+          {order.shopName || 'Unknown Shop'}
         </Text>
         <Badge 
           colorScheme={
