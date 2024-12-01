@@ -32,6 +32,8 @@ import LoadingScreen from './pages/utils/loading';
 import CancellationPolicy from './pages/utils/Refund';
 import PaymentSuccess from './pages/utils/PaymentSuccess';
 import Reset from './pages/Auth/Reset';
+import OrderSuccess from './pages/orders/OrderSuccess';
+import PaymentFailed from './pages/orders/PaymentFailed';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -103,6 +105,8 @@ function App() {
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
           <Route path="/refund" element={<CancellationPolicy />} />
           <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/payment-failed" element={<PaymentFailed />} />
           <Route 
             path="/vendor/dashboard" 
             element={
