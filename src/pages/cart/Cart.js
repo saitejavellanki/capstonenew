@@ -24,7 +24,7 @@ import {
   IconButton,
   useBreakpointValue
 } from '@chakra-ui/react';
-import { getFirestore, collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
@@ -34,7 +34,7 @@ const Cart = () => {
   const [groupedItems, setGroupedItems] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedShop, setSelectedShop] = useState(null);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
  
   const toast = useToast();
   const firestore = getFirestore();
@@ -42,8 +42,8 @@ const Cart = () => {
 
   // PayU Configuration
   const PAYU_MERCHANT_KEY = 'gSR07M';
-  const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
-  const PAYU_BASE_URL = 'https://secure.payu.in/_payment'; 
+  // const PAYU_SALT_KEY = 'is0d9q0QV8sOTOpB8j3XGJU0XR7o5zrS';
+  const PAYU_BASE_URL = 'https://secure.payu.in/_payment'; // Use test URL for sandbox
 
   const isMobile = useBreakpointValue({ base: true, md: false });
   const containerPadding = useBreakpointValue({ base: 4, md: 8 });
@@ -123,7 +123,14 @@ const Cart = () => {
     setGroupedItems(grouped);
   };
 
+  const handlePlaceOrder = async (shopId, shopData) => {
+    setSelectedShop({ id: shopId, ...shopData });
+    onOpen();
+  };
+
   const generatePayUHash = (params) => {
+    const PAYU_SALT_KEY = 'RZdd32itbMYSKM7Kwo4teRkhUKCsWbnj';
+  
     // Ensure consistent order of parameters
     const hashString = `${params.key}|${params.txnid}|${params.amount}|${params.productinfo}|${params.firstname}|${params.email}|||||||||||${PAYU_SALT_KEY}`;
   
@@ -133,26 +140,7 @@ const Cart = () => {
     return hash;
   };
 
-  const handlePlaceOrder = async (shopId, shopData) => {
-    // Prevent multiple simultaneous orders
-    if (isProcessingPayment) {
-      toast({
-        title: 'Processing',
-        description: 'An order is already being processed.',
-        status: 'info',
-        duration: 2000,
-      });
-      return;
-    }
-
-    setSelectedShop({ id: shopId, ...shopData });
-    onOpen();
-  };
-
   const initiatePayUPayment = async (shopData) => {
-    if (isProcessingPayment) return;
-    
-    setIsProcessingPayment(true);
     const user = JSON.parse(localStorage.getItem('user'));
     const txnid = `TXN_${Date.now()}`;
     
@@ -183,9 +171,8 @@ const Cart = () => {
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: `https://your-backend-domain.com/payment-success`, 
-        furl: `https://your-backend-domain.com/payment-failed`,
-        udf1: orderId  // Pass order ID as a user-defined field
+        surl: 'https://fostserver.onrender.com/payment-success', // Use order ID here
+        furl: 'http://localhost:5001/payment-success',
       };
   
       // Generate hash
@@ -194,7 +181,7 @@ const Cart = () => {
       // Redirect to PayU payment page
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = PAYU_BASE_URL;
+      form.action = 'https://secure.payu.in/_payment';
   
       // Add all payment parameters as hidden inputs
       Object.keys(paymentParams).forEach(key => {
@@ -217,35 +204,12 @@ const Cart = () => {
         duration: 3000,
         isClosable: true,
       });
-      setIsProcessingPayment(false);
       return null;
     }
   };
 
-  // Clear cart after successful order for a specific shop
-  const clearCartAfterOrder = (shopId) => {
-    const updatedCart = cartItems.filter(item => item.shopId !== shopId);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    setCartItems(updatedCart);
-    
-    const grouped = updatedCart.reduce((acc, item) => {
-      const currentShopId = item.shopId;
-      if (!acc[currentShopId]) {
-        acc[currentShopId] = {
-          items: [],
-          shopName: item.shopName,
-          total: 0
-        };
-      }
-      acc[currentShopId].items.push(item);
-      acc[currentShopId].total += item.price * item.quantity;
-      return acc;
-    }, {});
-    
-    setGroupedItems(grouped);
-  };
+  
 
-  // Rendering empty cart
   if (cartItems.length === 0) {
     return (
       <Container maxW="container.xl" py={containerPadding}>
@@ -257,10 +221,10 @@ const Cart = () => {
     );
   }
 
-  // Cart Item Component
   const CartItem = ({ item }) => (
     <Box width="100%">
       <Flex gap={4} width="100%">
+        {/* Image stays on left */}
         <Image
           src={item.imageUrl}
           alt={item.name}
@@ -270,12 +234,14 @@ const Cart = () => {
           flexShrink={0}
         />
         
+        {/* Content wrapper */}
         <Flex 
           flex="1"
           justify="space-between"
           width="100%"
           align="center"
         >
+          {/* Product details */}
           <VStack align="start" spacing={1}>
             <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>{item.name}</Text>
             <Text color="gray.600" fontSize={{ base: "sm", md: "md" }}>
@@ -283,11 +249,13 @@ const Cart = () => {
             </Text>
           </VStack>
   
+          {/* Right side controls - quantity, price, delete */}
           <Flex 
             align="center" 
             gap={{ base: 2, md: 6 }}
             flexShrink={0}
           >
+            {/* Quantity controls */}
             <HStack spacing={2}>
               <IconButton
                 size="sm"
@@ -304,6 +272,7 @@ const Cart = () => {
               />
             </HStack>
             
+            {/* Price */}
             <Text 
               fontWeight="bold" 
               fontSize={{ base: "sm", md: "md" }}
@@ -313,6 +282,7 @@ const Cart = () => {
               Rs {(item.price * item.quantity).toFixed(2)}
             </Text>
             
+            {/* Delete button */}
             <IconButton
               variant="ghost"
               colorScheme="red"
@@ -327,6 +297,17 @@ const Cart = () => {
       <Divider mt={4} />
     </Box>
   );
+
+  if (cartItems.length === 0) {
+    return (
+      <Container maxW="container.xl" py={containerPadding}>
+        <Alert status="info">
+          <AlertIcon />
+          Your cart is empty. Start shopping to add items!
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container maxW="container.xl" py={containerPadding}>
@@ -370,7 +351,6 @@ const Cart = () => {
                     size={{ base: "md", md: "lg" }}
                     width={{ base: "full", md: "auto" }}
                     onClick={() => handlePlaceOrder(shopId, shopData)}
-                    isLoading={isProcessingPayment}
                   >
                     Place Order
                   </Button>
@@ -396,17 +376,13 @@ const Cart = () => {
                 colorScheme="blue" 
                 onClick={() => initiatePayUPayment(selectedShop)}
                 width="full"
-                isLoading={isProcessingPayment}
-                loadingText="Processing Payment"
               >
                 Proceed to PayU Payment
               </Button>
             </Stack>
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onClick={onClose} isDisabled={isProcessingPayment}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
