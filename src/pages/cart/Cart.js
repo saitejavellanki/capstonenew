@@ -159,7 +159,7 @@ const Cart = () => {
     };
   
     try {
-      
+      // Create the order first to get the order ID
       const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
       const orderId = newDocRef.id;
   
@@ -194,8 +194,6 @@ const Cart = () => {
   
       document.body.appendChild(form);
       form.submit();
-
-      
   
       return orderId;
     } catch (error) {
