@@ -27,6 +27,9 @@ import {
   useBreakpointValue,
   Select,
   Badge,
+  Switch,
+  InputGroup,
+  InputLeftElement,
 } from "@chakra-ui/react";
 import { Link } from 'react-router-dom';
 import {
@@ -36,9 +39,12 @@ import {
   getDocs,
   query,
   where,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from "../../Components/firebase/Firebase";
+import { SearchIcon } from "@chakra-ui/icons";
 
 const FOOD_CATEGORIES = [
   "Beverages",
@@ -72,6 +78,8 @@ const FOOD_CATEGORIES = [
 
 const VendorItems = () => {
   const [items, setItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [itemData, setItemData] = useState({
@@ -80,6 +88,7 @@ const VendorItems = () => {
     description: "",
     imageUrl: "",
     category: "", // Added category field
+    isActive: true, // Add isActive by default
   });
   const [itemImage, setItemImage] = useState(null);
   const [itemImagePreview, setItemImagePreview] = useState('');
@@ -98,6 +107,18 @@ const VendorItems = () => {
     lg: "repeat(auto-fill, minmax(250px, 1fr))"
   });
 
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    const filtered = items.filter((item) => 
+      item.name.toLowerCase().includes(term) ||
+      item.category.toLowerCase().includes(term) ||
+      (item.description && item.description.toLowerCase().includes(term))
+    );
+
+    setFilteredItems(filtered);
+  };
   // Responsive button stack direction
   const buttonStackDirection = useBreakpointValue({ 
     base: "column", 
@@ -210,6 +231,48 @@ const VendorItems = () => {
     }
   };
 
+  const toggleItemActiveStatus = async (itemId, currentStatus) => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        throw new Error("No user found");
+      }
+
+      const user = JSON.parse(userStr);
+      const itemRef = doc(firestore, "items", itemId);
+
+      // Update the item's active status
+      await updateDoc(itemRef, {
+        isActive: !currentStatus
+      });
+
+      // Update local state to reflect the change
+      setItems(prevItems => 
+        prevItems.map(item => 
+          item.id === itemId 
+            ? { ...item, isActive: !currentStatus } 
+            : item
+        )
+      );
+
+      toast({
+        title: "Item Status Updated",
+        description: `Item ${!currentStatus ? 'activated' : 'deactivated'}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to update item status: ${error.message}`,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -234,6 +297,7 @@ const VendorItems = () => {
         description: itemData.description,
         imageUrl: imageUrl,
         category: itemData.category, // Added category
+        isActive: true,
         vendorId: user.uid,
         shopId: user.shopId || user.uid,
         createdAt: new Date(),
@@ -250,6 +314,7 @@ const VendorItems = () => {
         description: "",
         imageUrl: "",
         category: "", // Reset category
+        isActive: true,
       });
       setItemImage(null);
       setItemImagePreview('');
@@ -333,67 +398,98 @@ const VendorItems = () => {
           </Flex>
         </Flex>
 
-        <Grid 
-          templateColumns={gridColumns} 
-          gap={{ base: 4, md: 6 }}
-        >
-          {items.length === 0 ? (
-            <Text 
-              textAlign="center" 
-              gridColumn="1/-1" 
-              color="gray.500"
-            >
-              No items in your shop. Add some items to get started!
-            </Text>
-          ) : (
-            items.map((item) => (
-              <Box
-                key={item.id}
-                borderWidth={1}
-                borderRadius="lg"
-                overflow="hidden"
-                boxShadow="md"
-                transition="transform 0.2s"
-                _hover={{ transform: 'scale(1.02)' }}
-              >
-                <Image
-                  src={item.imageUrl}
-                  alt={item.name}
-                  height={{ base: '150px', md: '200px' }}
-                  width="100%"
-                  objectFit="cover"
-                  fallbackSrc="https://via.placeholder.com/200"
-                />
-                <Box p={{ base: 2, md: 4 }}>
-                  <Flex justify="space-between" align="center" mb={2}>
-                    <Heading size={{ base: 'sm', md: 'md' }}>
-                      {item.name}
-                    </Heading>
-                    <Badge colorScheme="purple" fontSize="0.8em">
-                      {item.category}
-                    </Badge>
-                  </Flex>
-                  <Text
-                    color="green.500"
-                    fontSize={{ base: 'lg', md: 'xl' }}
-                    fontWeight="bold"
-                    mb={2}
-                  >
-                    ${item.price.toFixed(2)}
-                  </Text>
-                  <Text 
-                    noOfLines={2} 
-                    color="gray.600"
-                    fontSize={{ base: 'sm', md: 'md' }}
-                  >
-                    {item.description}
-                  </Text>
-                </Box>
-              </Box>
-            ))
-          )}
-        </Grid>
+        {/* Search Input */}
+        <InputGroup mb={4}>
+          <InputLeftElement pointerEvents="none">
+            <SearchIcon color="gray.300" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search items by name, category, or description"
+            value={searchTerm}
+            onChange={handleSearch}
+            size="md"
+          />
+        </InputGroup>
 
+        <Grid 
+        templateColumns={gridColumns} 
+        gap={{ base: 4, md: 6 }}
+      >
+        {(searchTerm ? filteredItems : items).length === 0 ? (
+    <Text 
+      textAlign="center" 
+      gridColumn="1/-1" 
+      color="gray.500"
+    >
+      {searchTerm 
+        ? "No items match your search" 
+        : "No items in your shop. Add some items to get started!"
+      }
+    </Text>
+        ) : (
+          (searchTerm ? filteredItems : items).map((item) => (
+            <Box
+              key={item.id}
+              borderWidth={1}
+              borderRadius="lg"
+              overflow="hidden"
+              boxShadow="md"
+              transition="transform 0.2s"
+              _hover={{ transform: 'scale(1.02)' }}
+              opacity={item.isActive ? 1 : 0.5} // Visually indicate inactive items
+            >
+              <Image
+                src={item.imageUrl}
+                alt={item.name}
+                height={{ base: '150px', md: '200px' }}
+                width="100%"
+                objectFit="cover"
+                fallbackSrc="https://via.placeholder.com/200"
+                filter={!item.isActive ? 'grayscale(100%)' : 'none'} // Grayscale inactive items
+              />
+              <Box p={{ base: 2, md: 4 }}>
+                <Flex justify="space-between" align="center" mb={2}>
+                  <Heading size={{ base: 'sm', md: 'md' }}>
+                    {item.name}
+                  </Heading>
+                  <Badge colorScheme="purple" fontSize="0.8em">
+                    {item.category}
+                  </Badge>
+                </Flex>
+                <Text
+                  color="green.500"
+                  fontSize={{ base: 'lg', md: 'xl' }}
+                  fontWeight="bold"
+                  mb={2}
+                >
+                  ${item.price.toFixed(2)}
+                </Text>
+                <Text 
+                  noOfLines={2} 
+                  color="gray.600"
+                  fontSize={{ base: 'sm', md: 'md' }}
+                  mb={2}
+                >
+                  {item.description}
+                </Text>
+                <Flex align="center" justify="space-between">
+                  <Text 
+                    color={item.isActive ? "green.500" : "red.500"}
+                    fontWeight="bold"
+                  >
+                    {item.isActive ? "Active" : "Inactive"}
+                  </Text>
+                  <Switch
+                    isChecked={item.isActive}
+                    onChange={() => toggleItemActiveStatus(item.id, item.isActive)}
+                    colorScheme="green"
+                  />
+                </Flex>
+              </Box>
+            </Box>
+          ))
+        )}
+      </Grid>
         <Modal 
           isOpen={isOpen} 
           onClose={onClose}

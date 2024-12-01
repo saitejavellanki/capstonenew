@@ -22,7 +22,8 @@ import {
   ModalCloseButton,
   useDisclosure,
   useBreakpointValue,
-  chakra
+  chakra,
+  Badge
 } from '@chakra-ui/react';
 import { 
   getFirestore, 
@@ -35,35 +36,35 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
 
-const FOOD_CATEGORIES = [
-  "Beverages",
-  "Appetizers",
-  "Main Course",
-  "Desserts",
-  "Snacks",
-  "Breakfast",
-  "Lunch",
-  "Dinner",
-  "Vegan",
-  "Vegetarian",
-  "Salads",
-  "Soups",
-  "Fast Food",
-  "Street Food",
-  "Healthy Options",
-  "Milkshake Bites",
-  "Slushy Splash",
-  "Fruit-A-List",
-  "Ice Colas",
-  "Mojitos",
-  "Ba..Ba..Banana",
-  "We are Oreons",
-  "Chocolate Factory",
-  "Tipsy Thickshakes",
-  "Brownie Bros",
-  "Nutella Ninjas",
-  "Protein Shakes"
-];
+// const FOOD_CATEGORIES = [
+//   "Beverages",
+//   "Appetizers",
+//   "Main Course",
+//   "Desserts",
+//   "Snacks",
+//   "Breakfast",
+//   "Lunch",
+//   "Dinner",
+//   "Vegan",
+//   "Vegetarian",
+//   "Salads",
+//   "Soups",
+//   "Fast Food",
+//   "Street Food",
+//   "Healthy Options",
+//   "Milkshake Bites",
+//   "Slushy Splash",
+//   "Fruit-A-List",
+//   "Ice Colas",
+//   "Mojitos",
+//   "Ba..Ba..Banana",
+//   "We are Oreons",
+//   "Chocolate Factory",
+//   "Tipsy Thickshakes",
+//   "Brownie Bros",
+//   "Nutella Ninjas",
+//   "Protein Shakes"
+// ];
 
 const Shop = () => {
   const [items, setItems] = useState([]);
@@ -165,11 +166,26 @@ const Shop = () => {
   }, [shopId, firestore, toast]);
 
   const handleItemClick = (item) => {
-    setSelectedItem(item);
-    onOpen();
+    // Only allow clicking on active items
+    if (item.isActive !== false) {
+      setSelectedItem(item);
+      onOpen();
+    }
   };
 
   const addToCart = (item) => {
+
+    if (item.isActive === false) {
+      toast({
+        title: 'Item Unavailable',
+        description: 'This item is currently not available',
+        status: 'warning',
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
       const itemIndex = existingCart.findIndex(cartItem => cartItem.id === item.id);
@@ -317,149 +333,178 @@ const Shop = () => {
 
             {/* Categorized Items Section */}
             <Box>
-              {items.length === 0 ? (
-                <Alert status="info" variant="left-accent">
-                  <AlertIcon />
-                  <Text>No items available in this shop at the moment.</Text>
-                </Alert>
-              ) : (
-                Object.keys(categorizedItems)
-                  .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
-                  .map(category => (
-                    <Box 
-                      key={category} 
-                      mb={8}
-                      ref={el => categoryRefs.current[category] = el}
-                    >
-                      <Heading size="lg" mb={6}>{category}</Heading>
-                      <VStack spacing={4} align="stretch">
-                        {categorizedItems[category].map((item) => (
-                          <Box
-                            key={item.id}
-                            borderWidth="1px"
-                            borderRadius="lg"
-                            overflow="hidden"
-                            boxShadow="sm"
-                            transition="all 0.2s"
-                            _hover={{
-                              transform: 'translateY(-2px)',
-                              boxShadow: 'md',
-                            }}
-                            bg="white"
+          {items.length === 0 ? (
+            <Alert status="info" variant="left-accent">
+              <AlertIcon />
+              <Text>No items available in this shop at the moment.</Text>
+            </Alert>
+          ) : (
+            Object.keys(categorizedItems)
+              .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+              .map(category => (
+                <Box 
+                  key={category} 
+                  mb={8}
+                  ref={el => categoryRefs.current[category] = el}
+                >
+                  <Heading size="lg" mb={6}>{category}</Heading>
+                  <VStack spacing={4} align="stretch">
+                    {categorizedItems[category].map((item) => (
+                      <Box
+                        key={item.id}
+                        borderWidth="1px"
+                        borderRadius="lg"
+                        overflow="hidden"
+                        boxShadow="sm"
+                        transition="all 0.2s"
+                        opacity={item.isActive === false ? 0.5 : 1}
+                        _hover={{
+                          transform: item.isActive === false ? 'none' : 'translateY(-2px)',
+                          boxShadow: item.isActive === false ? 'sm' : 'md',
+                        }}
+                        bg="white"
+                        position="relative"
+                      >
+                        {item.isActive === false && (
+                          <Badge 
+                            position="absolute" 
+                            top={2} 
+                            right={2} 
+                            colorScheme="red"
+                            zIndex={10}
                           >
-                            <Flex direction="row">
-                              <Box 
-                                width="120px"
-                                height="120px"
-                                flexShrink={0}
-                                borderRadius="md"
-                                overflow="hidden"
-                              >
-                                <Image
-                                  src={item.imageUrl}
-                                  alt={item.name}
-                                  width="100%"
-                                  height="100%"
-                                  objectFit="cover"
-                                  cursor="pointer"
-                                  onClick={() => handleItemClick(item)}
-                                />
-                              </Box>
-
-                              <Flex 
-                                flex="1" 
-                                ml={4}
-                                direction="column"
-                                justify="space-between"
-                              >
-                                <Box>
-                                  <Heading size="sm" mb={1}>
-                                    {item.name}
-                                  </Heading>
-                                  <Text 
-                                    color="gray.600" 
-                                    noOfLines={2}
-                                    mb={2}
-                                    fontSize="sm"
-                                  >
-                                    {item.description}
-                                  </Text>
-                                </Box>
-
-                                <Flex 
-                                  justify="space-between" 
-                                  align="center"
-                                  mt="auto"
-                                >
-                                  <Text
-                                    color="green.600"
-                                    fontSize="2xl"
-                                    fontWeight="bold"
-                                  >
-                                    Rs.{item.price.toFixed(2)}
-                                  </Text>
-                                  <Button
-                                    colorScheme="blue"
-                                    onClick={() => addToCart(item)}
-                                    size="sm"
-                                    width="auto"
-                                  >
-                                    Add to Cart
-                                  </Button>
-                                </Flex>
-                              </Flex>
-                            </Flex>
+                            Unavailable
+                          </Badge>
+                        )}
+                        <Flex direction="row">
+                          <Box 
+                            width="120px"
+                            height="120px"
+                            flexShrink={0}
+                            borderRadius="md"
+                            overflow="hidden"
+                            filter={item.isActive === false ? 'grayscale(100%)' : 'none'}
+                          >
+                            <Image
+                              src={item.imageUrl}
+                              alt={item.name}
+                              width="100%"
+                              height="100%"
+                              objectFit="cover"
+                              cursor={item.isActive === false ? 'not-allowed' : 'pointer'}
+                              onClick={() => handleItemClick(item)}
+                            />
                           </Box>
-                        ))}
-                      </VStack>
-                    </Box>
-                  ))
-              )}
-            </Box>
+
+                          <Flex 
+                            flex="1" 
+                            ml={4}
+                            direction="column"
+                            justify="space-between"
+                          >
+                            <Box>
+                              <Heading size="sm" mb={1}>
+                                {item.name}
+                              </Heading>
+                              <Text 
+                                color="gray.600" 
+                                noOfLines={2}
+                                mb={2}
+                                fontSize="sm"
+                              >
+                                {item.description}
+                              </Text>
+                            </Box>
+
+                            <Flex 
+                              justify="space-between" 
+                              align="center"
+                              mt="auto"
+                            >
+                              <Text
+                                color={item.isActive === false ? "gray.400" : "green.600"}
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                textDecoration={item.isActive === false ? "line-through" : "none"}
+                              >
+                                Rs.{item.price.toFixed(2)}
+                              </Text>
+                              <Button
+                                colorScheme="blue"
+                                onClick={() => addToCart(item)}
+                                size="sm"
+                                width="auto"
+                                isDisabled={item.isActive === false}
+                              >
+                                {item.isActive === false ? 'Unavailable' : 'Add to Cart'}
+                              </Button>
+                            </Flex>
+                          </Flex>
+                        </Flex>
+                      </Box>
+                    ))}
+                  </VStack>
+                </Box>
+              ))
+          )}
+        </Box>
 
             {/* Category Navigation */}
             <CategoryNavigation />
 
             {/* Existing Modal Code */}
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>{selectedItem?.name}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  {selectedItem && (
-                    <VStack spacing={4} align="stretch">
-                      <Image 
-                        src={selectedItem.imageUrl}
-                        alt={selectedItem.name}
-                        maxH="400px"
-                        objectFit="cover"
-                        borderRadius="md"
-                      />
-                      <Text>{selectedItem.description}</Text>
-                      <Flex justify="space-between" align="center">
-                        <Text 
-                          color="green.600" 
-                          fontSize="2xl" 
-                          fontWeight="bold"
-                        >
-                          ${selectedItem.price.toFixed(2)}
-                        </Text>
-                        <Button 
-                          colorScheme="blue" 
-                          onClick={() => {
-                            addToCart(selectedItem);
-                            onClose();
-                          }}
-                        >
-                          Add to Cart
-                        </Button>
-                      </Flex>
-                    </VStack>
-                  )}
-                </ModalBody>
-              </ModalContent>
-            </Modal>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>
+              {selectedItem?.name}
+              {selectedItem?.isActive === false && (
+                <Badge 
+                  ml={2} 
+                  colorScheme="red"
+                >
+                  Unavailable
+                </Badge>
+              )}
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedItem && (
+                <VStack spacing={4} align="stretch">
+                  <Image 
+                    src={selectedItem.imageUrl}
+                    alt={selectedItem.name}
+                    maxH="400px"
+                    objectFit="cover"
+                    borderRadius="md"
+                    filter={selectedItem.isActive === false ? 'grayscale(100%)' : 'none'}
+                  />
+                  <Text>{selectedItem.description}</Text>
+                  <Flex justify="space-between" align="center">
+                    <Text 
+                      color={selectedItem.isActive === false ? "gray.400" : "green.600"}
+                      fontSize="2xl" 
+                      fontWeight="bold"
+                      textDecoration={selectedItem.isActive === false ? "line-through" : "none"}
+                    >
+                      ${selectedItem.price.toFixed(2)}
+                    </Text>
+                    <Button 
+                      colorScheme="blue" 
+                      onClick={() => {
+                        addToCart(selectedItem);
+                        onClose();
+                      }}
+                      isDisabled={selectedItem.isActive === false}
+                    >
+                      {selectedItem.isActive === false ? 'Unavailable' : 'Add to Cart'}
+                    </Button>
+                  </Flex>
+                </VStack>
+              )}
+            </ModalBody>
+          </ModalContent>
+        </Modal>
           </>
         )}
       </VStack>
