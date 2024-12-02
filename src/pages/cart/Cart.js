@@ -149,7 +149,7 @@ const Cart = () => {
     const txnid = `TXN_${Date.now()}`;
     
     // First, create the order in Firestore to get the order ID
-    const orderData = {
+    const transactionData = {
       shopId: shopData.id,
       userId: user.uid,
       shopName: shopData.shopName,
@@ -164,8 +164,8 @@ const Cart = () => {
   
     try {
       // Create the order first to get the order ID
-      const newDocRef = await addDoc(collection(firestore, 'orders'), orderData);
-      const orderId = newDocRef.id;
+      const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
+      const transactionId = transactionRef.id;
   
       const paymentParams = {
         key: PAYU_MERCHANT_KEY,
@@ -175,7 +175,7 @@ const Cart = () => {
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: 'https://fostserver.onrender.com/payment-success', // Use order ID here
+        surl: `http://localhost:5051/payment-success?transactionId=${txnid}`, // Use order ID here
         furl: 'http://localhost:5001/payment-success',
       };
   
@@ -199,7 +199,7 @@ const Cart = () => {
       document.body.appendChild(form);
       form.submit();
   
-      return orderId;
+      
     } catch (error) {
       toast({
         title: 'Error',

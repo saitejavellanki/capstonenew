@@ -269,27 +269,52 @@ const Home = () => {
     const fetchActiveOrders = async () => {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
+        console.log('User from localStorage:', user);
+    
         if (!user) {
+          console.log('No user found in localStorage');
           setLoading(false);
           return;
         }
-
+    
         const ordersRef = collection(firestore, 'orders');
         const activeOrdersQuery = query(
           ordersRef, 
-          where('userId', '==', user.uid),
-          where('status', 'in', ['pending', 'processing', 'completed'])
+          where('userId', '==', user.uid)
+          
         );
         
-        const unsubscribe = onSnapshot(activeOrdersQuery, (snapshot) => {
-          const orders = snapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(activeOrdersQuery);
+        console.log('Total orders found:', querySnapshot.size);
+        
+        querySnapshot.forEach(doc => {
+          console.log('Order document:', {
             id: doc.id,
-            ...doc.data()
-          }));
+            data: doc.data()
+          });
+        });
+    
+        const unsubscribe = onSnapshot(activeOrdersQuery, (snapshot) => {
+          console.log('Snapshot size:', snapshot.size);
+          
+          const orders = snapshot.docs.map(doc => {
+            const orderData = doc.data();
+            console.log('Individual order:', {
+              id: doc.id,
+              userId: orderData.userId,
+              status: orderData.status,
+              ...orderData
+            });
+            return {
+              id: doc.id,
+              ...orderData
+            };
+          });
+          
           setActiveOrders(orders);
           setLoading(false);
         });
-
+    
         return () => unsubscribe();
       } catch (error) {
         console.error('Error fetching active orders:', error);
