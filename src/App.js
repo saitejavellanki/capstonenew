@@ -105,8 +105,6 @@ function App() {
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
           <Route path="/refund" element={<CancellationPolicy />} />
           <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
-          <Route path="/order-success" element={<OrderSuccess />} />
-          <Route path="/payment-failed" element={<PaymentFailed />} />
           <Route 
             path="/vendor/dashboard" 
             element={
