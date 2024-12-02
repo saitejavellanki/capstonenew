@@ -210,6 +210,8 @@ const Shop = () => {
       
       localStorage.setItem('cart', JSON.stringify(existingCart));
       
+      window.dispatchEvent(new Event('cartUpdate'));
+      
       toast({
         title: 'Added to Cart',
         description: `${item.name} has been added to your cart`,

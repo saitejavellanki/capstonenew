@@ -78,6 +78,8 @@ const Cart = () => {
     const updatedCart = cartItems.filter(item => item.id !== itemId);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCartItems(updatedCart);
+
+    window.dispatchEvent(new Event('cartUpdate'));
     
     const grouped = updatedCart.reduce((acc, item) => {
       const shopId = item.shopId;
@@ -105,6 +107,8 @@ const Cart = () => {
     
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCartItems(updatedCart);
+
+    window.dispatchEvent(new Event('cartUpdate'));
     
     const grouped = updatedCart.reduce((acc, item) => {
       const shopId = item.shopId;

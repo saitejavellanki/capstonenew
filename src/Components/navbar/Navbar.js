@@ -60,15 +60,15 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const loadCartCount = () => {
-      const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-      setCartCount(cartItems.length);
-    };
+  const loadCartCount = () => {
+    const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+    setCartCount(cartItems.length);
+  };
 
-    loadCartCount();
-    window.addEventListener('cartUpdate', loadCartCount);
-    return () => window.removeEventListener('cartUpdate', loadCartCount);
-  }, []);
+  loadCartCount();
+  window.addEventListener('cartUpdate', loadCartCount);
+  return () => window.removeEventListener('cartUpdate', loadCartCount);
+}, []);
 
   const handleShopStatusToggle = async () => {
     try {
