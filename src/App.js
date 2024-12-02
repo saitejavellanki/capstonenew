@@ -32,8 +32,7 @@ import LoadingScreen from './pages/utils/loading';
 import CancellationPolicy from './pages/utils/Refund';
 import PaymentSuccess from './pages/utils/PaymentSuccess';
 import Reset from './pages/Auth/Reset';
-import OrderSuccess from './pages/orders/OrderSuccess';
-import PaymentFailed from './pages/orders/PaymentFailed';
+
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
