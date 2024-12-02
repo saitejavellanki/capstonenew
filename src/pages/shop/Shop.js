@@ -439,6 +439,11 @@ const Shop = () => {
                               <Heading size="sm" mb={1}>
                                 {item.name}
                               </Heading>
+                              <Badge 
+              colorScheme={item.dietType === 'veg' ? 'green' : 'red'}
+            >
+              {item.dietType === 'veg' ? 'Veg' : 'Non-Veg'}
+            </Badge>
                               <Text 
                                 color="gray.600" 
                                 noOfLines={2}
@@ -489,6 +494,23 @@ const Shop = () => {
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
           <ModalOverlay />
           <ModalContent>
+          <ModalHeader>
+  {selectedItem?.name}
+  <Badge 
+    ml={2} 
+    colorScheme={selectedItem?.dietType === 'veg' ? 'green' : 'red'}
+  >
+    {selectedItem?.dietType === 'veg' ? 'Vegetarian' : 'Non-Vegetarian'}
+  </Badge>
+  {selectedItem?.isActive === false && (
+    <Badge 
+      ml={2} 
+      colorScheme="red"
+    >
+      Unavailable
+    </Badge>
+  )}
+</ModalHeader>
             <ModalHeader>
               {selectedItem?.name}
               {selectedItem?.isActive === false && (
