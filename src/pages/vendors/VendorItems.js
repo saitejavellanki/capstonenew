@@ -30,6 +30,8 @@ import {
   Switch,
   InputGroup,
   InputLeftElement,
+  Radio,
+  RadioGroup
 } from "@chakra-ui/react";
 import { Link } from 'react-router-dom';
 import {
@@ -44,7 +46,7 @@ import {
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from "../../Components/firebase/Firebase";
-import { SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon, EditIcon } from "@chakra-ui/icons";
 
 const FOOD_CATEGORIES = [
   "Beverages",
@@ -82,6 +84,7 @@ const VendorItems = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const [itemData, setItemData] = useState({
     name: "",
     price: "",
@@ -89,11 +92,23 @@ const VendorItems = () => {
     imageUrl: "",
     category: "", // Added category field
     isActive: true, // Add isActive by default
+    dietType: "veg",
+    
   });
   const [itemImage, setItemImage] = useState(null);
   const [itemImagePreview, setItemImagePreview] = useState('');
   const [error, setError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { 
+    isOpen: isEditModalOpen, 
+    onOpen: onEditModalOpen, 
+    onClose: onEditModalClose 
+  } = useDisclosure();
+  const { 
+    isOpen: isAddModalOpen, 
+    onOpen: onAddModalOpen, 
+    onClose: onAddModalClose 
+  } = useDisclosure();
 
   const firestore = getFirestore(app);
   const storage = getStorage(app);
@@ -114,10 +129,26 @@ const VendorItems = () => {
     const filtered = items.filter((item) => 
       item.name.toLowerCase().includes(term) ||
       item.category.toLowerCase().includes(term) ||
-      (item.description && item.description.toLowerCase().includes(term))
+      (item.description && item.description.toLowerCase().includes(term)) ||
+      item.dietType.toLowerCase().includes(term) 
     );
 
     setFilteredItems(filtered);
+  };
+
+  const startEditItem = (item) => {
+    setEditItem(item);
+    setItemData({
+      name: item.name,
+      price: item.price.toString(),
+      description: item.description,
+      imageUrl: item.imageUrl,
+      category: item.category,
+      isActive: item.isActive,
+      dietType: item.dietType
+    });
+    setItemImagePreview(item.imageUrl);
+    onEditModalOpen();
   };
   // Responsive button stack direction
   const buttonStackDirection = useBreakpointValue({ 
@@ -297,6 +328,7 @@ const VendorItems = () => {
         description: itemData.description,
         imageUrl: imageUrl,
         category: itemData.category, // Added category
+        dietType: itemData.dietType,
         isActive: true,
         vendorId: user.uid,
         shopId: user.shopId || user.uid,
@@ -315,6 +347,7 @@ const VendorItems = () => {
         imageUrl: "",
         category: "", // Reset category
         isActive: true,
+        dietType: "veg",
       });
       setItemImage(null);
       setItemImagePreview('');
@@ -360,6 +393,77 @@ const VendorItems = () => {
     );
   }
 
+  const handleUpdateItem = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const userStr = localStorage.getItem("user");
+      const user = JSON.parse(userStr);
+
+      let imageUrl = itemData.imageUrl;
+      if (itemImage) {
+        imageUrl = await uploadItemImage();
+        if (!imageUrl) {
+          console.error("Image upload failed");
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      const itemRef = doc(firestore, "items", editItem.id);
+      await updateDoc(itemRef, {
+        name: itemData.name,
+        price: parseFloat(itemData.price),
+        description: itemData.description,
+        imageUrl: imageUrl,
+        category: itemData.category,
+        dietType: itemData.dietType,
+      });
+
+      // Update local state
+      setItems(prevItems => 
+        prevItems.map(item => 
+          item.id === editItem.id 
+            ? { ...item, ...itemData, imageUrl, price: parseFloat(itemData.price) } 
+            : item
+        )
+      );
+
+      // Reset form and close modal
+      setItemData({
+        name: "",
+        price: "",
+        description: "",
+        imageUrl: "",
+        category: "",
+        isActive: true,
+        dietType: "veg",
+      });
+      setItemImage(null);
+      setItemImagePreview('');
+      onEditModalClose();
+
+      toast({
+        title: "Success",
+        description: "Item updated successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Full Error Details:", error);
+      toast({
+        title: "Error",
+        description: `Failed to update item: ${error.message}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <Box p={{ base: 3, md: 6 }}>
       <VStack spacing={6} align="stretch">
@@ -437,6 +541,7 @@ const VendorItems = () => {
               transition="transform 0.2s"
               _hover={{ transform: 'scale(1.02)' }}
               opacity={item.isActive ? 1 : 0.5} // Visually indicate inactive items
+              position="relative"
             >
               <Image
                 src={item.imageUrl}
@@ -455,6 +560,12 @@ const VendorItems = () => {
                   <Badge colorScheme="purple" fontSize="0.8em">
                     {item.category}
                   </Badge>
+                  <Badge 
+  colorScheme={item.dietType === 'veg' ? 'green' : 'red'} 
+  fontSize="0.8em"
+>
+  {item.dietType ? item.dietType.toUpperCase() : 'UNSPECIFIED'}
+</Badge>
                 </Flex>
                 <Text
                   color="green.500"
@@ -485,131 +596,167 @@ const VendorItems = () => {
                     colorScheme="green"
                   />
                 </Flex>
+                <Flex 
+        position="absolute" 
+        top={2} 
+        right={2} 
+        zIndex={10}
+      >
+        <Button 
+          size="sm" 
+          colorScheme="blue" 
+          onClick={() => startEditItem(item)}
+          mr={2}
+        >
+          <EditIcon />
+        </Button>
+      </Flex>
               </Box>
             </Box>
           ))
         )}
       </Grid>
-        <Modal 
-          isOpen={isOpen} 
-          onClose={onClose}
-          size={{ base: 'full', md: 'md' }}
-        >
-          <ModalOverlay />
-          <ModalContent 
-            mx={{ base: 0, md: 'auto' }} 
-            my={{ base: 0, md: '10vh' }}
+      <Modal 
+  isOpen={isEditModalOpen} 
+  onClose={onEditModalClose}
+  size={{ base: 'full', md: 'md' }}
+>
+  <ModalOverlay />
+  <ModalContent 
+    mx={{ base: 0, md: 'auto' }} 
+    my={{ base: 0, md: '10vh' }}
+  >
+    <ModalHeader>Edit Item</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody pb={6}>
+      <form onSubmit={handleUpdateItem}>
+        <VStack spacing={4}>
+          <FormControl isRequired>
+            <FormLabel>Item Name</FormLabel>
+            <Input
+              name="name"
+              value={itemData.name}
+              onChange={handleInputChange}
+              placeholder="Enter item name"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Diet Type</FormLabel>
+            <RadioGroup 
+              name="dietType"
+              value={itemData.dietType}
+              onChange={(value) => setItemData(prev => ({
+                ...prev,
+                dietType: value
+              }))}
+            >
+              <HStack spacing={4}>
+                <Radio value="veg" colorScheme="green">
+                  Vegetarian
+                </Radio>
+                <Radio value="non-veg" colorScheme="red">
+                  Non-Vegetarian
+                </Radio>
+              </HStack>
+            </RadioGroup>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Category</FormLabel>
+            <Select
+              name="category"
+              value={itemData.category}
+              onChange={handleInputChange}
+              placeholder="Select category"
+              size={{ base: 'md', md: 'lg' }}
+            >
+              {FOOD_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Price</FormLabel>
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={itemData.price}
+              onChange={handleInputChange}
+              placeholder="Enter price"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Description</FormLabel>
+            <Textarea
+              name="description"
+              value={itemData.description}
+              onChange={handleInputChange}
+              placeholder="Enter item description"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl >
+            <FormLabel>Item Image</FormLabel>
+            <Input 
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              onChange={handleImageChange}
+              size={{ base: 'md', md: 'lg' }}
+              sx={{
+                '::file-selector-button': {
+                  height: '40px',
+                  padding: '0 15px',
+                  mr: 4,
+                  bg: 'gray.200',
+                  borderRadius: 'md',
+                  cursor: 'pointer'
+                }
+              }}
+            />
+            {itemImagePreview && (
+              <Image 
+                src={itemImagePreview} 
+                alt="Item Preview" 
+                mt={4} 
+                maxH={{ base: '150px', md: '200px' }} 
+                objectFit="cover" 
+                width="100%"
+              />
+            )}
+            <Input
+              mt={2}
+              name="imageUrl"
+              value={itemData.imageUrl}
+              onChange={handleInputChange}
+              placeholder="Or enter image URL"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <Button
+            type="submit"
+            colorScheme="blue"
+            width="full"
+            isLoading={submitting}
+            size={{ base: 'md', md: 'lg' }}
           >
-            <ModalHeader>Add New Item</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <form onSubmit={handleSubmit}>
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Item Name</FormLabel>
-                    <Input
-                      name="name"
-                      value={itemData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter item name"
-                      size={{ base: 'md', md: 'lg' }}
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Category</FormLabel>
-                    <Select
-                      name="category"
-                      value={itemData.category}
-                      onChange={handleInputChange}
-                      placeholder="Select category"
-                      size={{ base: 'md', md: 'lg' }}
-                    >
-                      {FOOD_CATEGORIES.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Price</FormLabel>
-                    <Input
-                      name="price"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={itemData.price}
-                      onChange={handleInputChange}
-                      placeholder="Enter price"
-                      size={{ base: 'md', md: 'lg' }}
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Description</FormLabel>
-                    <Textarea
-                      name="description"
-                      value={itemData.description}
-                      onChange={handleInputChange}
-                      placeholder="Enter item description"
-                      size={{ base: 'md', md: 'lg' }}
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Item Image</FormLabel>
-                    <Input 
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif"
-                      onChange={handleImageChange}
-                      size={{ base: 'md', md: 'lg' }}
-                      sx={{
-                        '::file-selector-button': {
-                          height: '40px',
-                          padding: '0 15px',
-                          mr: 4,
-                          bg: 'gray.200',
-                          borderRadius: 'md',
-                          cursor: 'pointer'
-                        }
-                      }}
-                    />
-                    {itemImagePreview && (
-                      <Image 
-                        src={itemImagePreview} 
-                        alt="Item Preview" 
-                        mt={4} 
-                        maxH={{ base: '150px', md: '200px' }} 
-                        objectFit="cover" 
-                        width="100%"
-                      />
-                    )}
-                    <Input
-                      mt={2}
-                      name="imageUrl"
-                      value={itemData.imageUrl}
-                      onChange={handleInputChange}
-                      placeholder="Or enter image URL"
-                      size={{ base: 'md', md: 'lg' }}
-                    />
-                  </FormControl>
-
-                  <Button
-                    type="submit"
-                    colorScheme="blue"
-                    width="full"
-                    isLoading={submitting}
-                    size={{ base: 'md', md: 'lg' }}
-                  >
-                    Add Item
-                  </Button>
-                </VStack>
-              </form>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+            Update Item
+          </Button>
+        </VStack>
+      </form>
+    </ModalBody>
+  </ModalContent>
+</Modal>
       </VStack>
     </Box>
   );
