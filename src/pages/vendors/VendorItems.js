@@ -125,14 +125,14 @@ const VendorItems = () => {
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-
+  
     const filtered = items.filter((item) => 
-      item.name.toLowerCase().includes(term) ||
-      item.category.toLowerCase().includes(term) ||
+      (item.name && item.name.toLowerCase().includes(term)) ||
+      (item.category && item.category.toLowerCase().includes(term)) ||
       (item.description && item.description.toLowerCase().includes(term)) ||
-      item.dietType.toLowerCase().includes(term) 
+      (item.dietType && item.dietType.toLowerCase().includes(term)) 
     );
-
+  
     setFilteredItems(filtered);
   };
 
@@ -573,7 +573,7 @@ const VendorItems = () => {
                   fontWeight="bold"
                   mb={2}
                 >
-                  ${item.price.toFixed(2)}
+                  Rs.{item.price.toFixed(2)}
                 </Text>
                 <Text 
                   noOfLines={2} 
@@ -616,9 +616,10 @@ const VendorItems = () => {
           ))
         )}
       </Grid>
-      <Modal 
-  isOpen={isEditModalOpen} 
-  onClose={onEditModalClose}
+      {/* Add New Item Modal */}
+<Modal 
+  isOpen={isOpen} 
+  onClose={onClose}
   size={{ base: 'full', md: 'md' }}
 >
   <ModalOverlay />
@@ -626,10 +627,10 @@ const VendorItems = () => {
     mx={{ base: 0, md: 'auto' }} 
     my={{ base: 0, md: '10vh' }}
   >
-    <ModalHeader>Edit Item</ModalHeader>
+    <ModalHeader>Add New Item</ModalHeader>
     <ModalCloseButton />
     <ModalBody pb={6}>
-      <form onSubmit={handleUpdateItem}>
+      <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           <FormControl isRequired>
             <FormLabel>Item Name</FormLabel>
@@ -705,7 +706,7 @@ const VendorItems = () => {
             />
           </FormControl>
 
-          <FormControl >
+          <FormControl>
             <FormLabel>Item Image</FormLabel>
             <Input 
               type="file"
@@ -750,7 +751,7 @@ const VendorItems = () => {
             isLoading={submitting}
             size={{ base: 'md', md: 'lg' }}
           >
-            Update Item
+            Add Item
           </Button>
         </VStack>
       </form>
