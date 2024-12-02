@@ -23,7 +23,12 @@ import {
   useDisclosure,
   useBreakpointValue,
   chakra,
-  Badge
+  Badge,
+  HStack,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody
 } from '@chakra-ui/react';
 import { 
   getFirestore, 
@@ -34,6 +39,7 @@ import {
   getDoc,
   doc 
 } from 'firebase/firestore';
+import { ViewColumnsIcon } from '@heroicons/react/24/outline';
 import { app } from '../../Components/firebase/Firebase';
 
 // const FOOD_CATEGORIES = [
@@ -76,6 +82,7 @@ const Shop = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const { shopId } = useParams();
   const firestore = getFirestore(app);
+  const [hoveredItem, setHoveredItem] = useState(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   
@@ -232,51 +239,77 @@ const Shop = () => {
 
   // Category Navigation Menu
   const CategoryNavigation = () => (
-    <Box 
-      position="fixed" 
-      bottom={4} 
-      left={0} 
-      right={0} 
-      zIndex={10} 
-      px={4}
-    >
-      <Flex 
-        bg="whiteAlpha.800" 
-        backdropFilter="blur(10px)" 
-        borderRadius="full" 
-        boxShadow="0 4px 6px rgba(0,0,0,0.1)" 
-        overflowX="auto" 
-        p={2} 
-        gap={2}
-        maxW="600px"
-        mx="auto"
-        border="1px solid"
-        borderColor="gray.100"
+    <Popover>
+      <PopoverTrigger>
+        <Box
+          position="fixed"
+          bottom={{ base: 4, md: 6 }}
+          right={{ base: 4, md: 6 }}
+          zIndex={20}
+        >
+          <Button
+            colorScheme="blue"
+            borderRadius="full"
+            size="lg"
+            boxShadow="xl"
+            p={0}
+            width="56px"
+            height="56px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <ViewColumnsIcon width={24} height={24} />
+          </Button>
+        </Box>
+      </PopoverTrigger>
+      <PopoverContent 
+        width="auto" 
+        maxWidth="300px"
+        bottom="80px"
+        right="20px"
+        position="fixed"
+        boxShadow="xl"
+        borderRadius="xl"
+        bg="white"
       >
-        {Object.keys(categorizedItems).map(category => (
-          category !== 'Uncategorized' && (
-            <Button
-              key={category}
-              size="sm"
-              variant={activeCategory === category ? "solid" : "ghost"}
-              colorScheme={activeCategory === category ? "blue" : "gray"}
-              borderRadius="full"
-              onClick={() => scrollToCategory(category)}
-              px={3}
-              transition="all 0.2s"
-              _hover={{
-                transform: activeCategory === category ? 'none' : 'scale(1.05)',
-                bg: activeCategory === category ? undefined : 'gray.50'
-              }}
-            >
-              {category}
-            </Button>
-          )
-        ))}
-      </Flex>
-    </Box>
+        <PopoverBody>
+          <VStack 
+            spacing={2} 
+            align="stretch" 
+            maxHeight="300px" 
+            overflowY="auto"
+            p={2}
+          >
+            {Object.keys(categorizedItems)
+              .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+              .map(category => (
+                <Button
+                  key={category}
+                  variant={activeCategory === category ? "solid" : "ghost"}
+                  colorScheme={activeCategory === category ? "blue" : "gray"}
+                  justifyContent="flex-start"
+                  onClick={() => scrollToCategory(category)}
+                  size="md"
+                  borderRadius="md"
+                >
+                  {category} 
+                  <Badge 
+                    ml={2} 
+                    colorScheme="gray" 
+                    variant="solid" 
+                    borderRadius="full"
+                    fontSize="0.7em"
+                  >
+                    {categorizedItems[category].length}
+                  </Badge>
+                </Button>
+              ))}
+          </VStack>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
   );
-
   return (
     <Container maxW="container.xl" py={8} position="relative" pb={20}>
       <VStack spacing={8} align="stretch">
