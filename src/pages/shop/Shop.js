@@ -211,7 +211,7 @@ const Shop = () => {
       localStorage.setItem('cart', JSON.stringify(existingCart));
       
       window.dispatchEvent(new Event('cartUpdate'));
-      
+
       toast({
         title: 'Added to Cart',
         description: `${item.name} has been added to your cart`,
@@ -240,78 +240,148 @@ const Shop = () => {
   };
 
   // Category Navigation Menu
-  const CategoryNavigation = () => (
-    <Popover>
-      <PopoverTrigger>
-        <Box
-          position="fixed"
-          bottom={{ base: 4, md: 6 }}
-          right={{ base: 4, md: 6 }}
-          zIndex={20}
-        >
-          <Button
-            colorScheme="blue"
-            borderRadius="full"
-            size="lg"
-            boxShadow="xl"
-            p={0}
-            width="56px"
-            height="56px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <ViewColumnsIcon width={24} height={24} />
-          </Button>
-        </Box>
-      </PopoverTrigger>
-      <PopoverContent 
-        width="auto" 
-        maxWidth="300px"
-        bottom="80px"
-        right="20px"
-        position="fixed"
-        boxShadow="xl"
-        borderRadius="xl"
-        bg="white"
+  const CategoryNavigation = () => {
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+  return (
+    <Box
+      position="fixed"
+      bottom={4}
+      right={4}
+      zIndex={20}
+    >
+      <Popover 
+        placement="top-end"
+        isLazy
+        lazyBehavior="unmount"
       >
-        <PopoverBody>
-          <VStack 
-            spacing={2} 
-            align="stretch" 
-            maxHeight="300px" 
-            overflowY="auto"
-            p={2}
-          >
-            {Object.keys(categorizedItems)
-              .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
-              .map(category => (
-                <Button
-                  key={category}
-                  variant={activeCategory === category ? "solid" : "ghost"}
-                  colorScheme={activeCategory === category ? "blue" : "gray"}
-                  justifyContent="flex-start"
-                  onClick={() => scrollToCategory(category)}
-                  size="md"
-                  borderRadius="md"
+        {({ isOpen }) => (
+          <>
+            <PopoverTrigger>
+              <Button
+                colorScheme="blue"
+                borderRadius="full"
+                size="lg"
+                boxShadow="xl"
+                p={0}
+                width="56px"
+                height="56px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <ViewColumnsIcon width={24} height={24} />
+              </Button>
+            </PopoverTrigger>
+            {isMobile ? (
+              <Modal 
+                isOpen={isOpen} 
+                onClose={() => {}} 
+                size="xs"
+                motionPreset="slideInBottom"
+              >
+                <ModalOverlay />
+                <ModalContent 
+                  position="absolute" 
+                  bottom={0} 
+                  mb={0} 
+                  borderBottomRadius={0}
                 >
-                  {category} 
-                  <Badge 
-                    ml={2} 
-                    colorScheme="gray" 
-                    variant="solid" 
-                    borderRadius="full"
-                    fontSize="0.7em"
+                  <ModalHeader>Categories</ModalHeader>
+                  <ModalCloseButton />
+                  <ModalBody p={2}>
+                    <VStack 
+                      spacing={2} 
+                      align="stretch" 
+                      maxHeight="300px" 
+                      overflowY="auto"
+                    >
+                      {Object.keys(categorizedItems)
+                        .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+                        .map(category => (
+                          <Button
+                            key={category}
+                            variant={activeCategory === category ? "solid" : "ghost"}
+                            colorScheme={activeCategory === category ? "blue" : "gray"}
+                            justifyContent="space-between"
+                            onClick={() => {
+                              scrollToCategory(category);
+                              // Close the modal/popover
+                              document.querySelector('[aria-label="Close"]')?.click();
+                            }}
+                            size="md"
+                            borderRadius="md"
+                          >
+                            <Text>{category}</Text>
+                            <Badge 
+                              ml={2} 
+                              colorScheme="gray" 
+                              variant="solid" 
+                              borderRadius="full"
+                              fontSize="0.7em"
+                            >
+                              {categorizedItems[category].length}
+                            </Badge>
+                          </Button>
+                        ))}
+                    </VStack>
+                  </ModalBody>
+                </ModalContent>
+              </Modal>
+            ) : (
+              <PopoverContent 
+                width="auto" 
+                maxWidth="300px"
+                boxShadow="xl"
+                borderRadius="xl"
+                bg="white"
+              >
+                <PopoverBody>
+                  <VStack 
+                    spacing={2} 
+                    align="stretch" 
+                    maxHeight="300px" 
+                    overflowY="auto"
+                    p={2}
                   >
-                    {categorizedItems[category].length}
-                  </Badge>
-                </Button>
-              ))}
-          </VStack>
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+                    {Object.keys(categorizedItems)
+                      .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+                      .map(category => (
+                        <Button
+                          key={category}
+                          variant={activeCategory === category ? "solid" : "ghost"}
+                          colorScheme={activeCategory === category ? "blue" : "gray"}
+                          justifyContent="space-between"
+                          onClick={() => {
+                            scrollToCategory(category);
+                            // Close the popover
+                            document.querySelector('[aria-label="Close"]')?.click();
+                          }}
+                          size="md"
+                          borderRadius="md"
+                        >
+                          <Text>{category}</Text>
+                          <Badge 
+                            ml={2} 
+                            colorScheme="gray" 
+                            variant="solid" 
+                            borderRadius="full"
+                            fontSize="0.7em"
+                          >
+                            {categorizedItems[category].length}
+                          </Badge>
+                        </Button>
+                      ))}
+                  </VStack>
+                </PopoverBody>
+              </PopoverContent>
+            )}
+          </>
+        )}
+      </Popover>
+    </Box>
   );
+};
   return (
     <Container maxW="container.xl" py={8} position="relative" pb={20}>
       <VStack spacing={8} align="stretch">
