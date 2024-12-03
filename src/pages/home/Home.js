@@ -122,10 +122,11 @@ const PopularShopCard = ({ shop, onClick }) => (
     borderRadius="2xl"
     overflow="hidden"
     boxShadow="md"
-    cursor="pointer"
-    onClick={onClick}
-    whileHover={{ scale: 1.05 }}
+    cursor={shop.isOpen ? "pointer" : "not-allowed"}
+    onClick={shop.isOpen ? onClick : undefined}
+    whileHover={shop.isOpen ? { scale: 1.05 } : {}}
     transition="all 0.3s ease"
+    opacity={shop.isOpen ? 1 : 0.6}
   >
     {/* Shop Image */}
     <Image
@@ -134,7 +135,7 @@ const PopularShopCard = ({ shop, onClick }) => (
       w="full"
       h="200px"
       objectFit="cover"
-      filter="brightness(0.8)"
+      filter={!shop.isOpen ? "grayscale(100%) brightness(0.7)" : "brightness(0.8)"}
     />
     
     {/* Shop Details Overlay */}
@@ -158,9 +159,14 @@ const PopularShopCard = ({ shop, onClick }) => (
           </Text>
           <HStack>
             {shop.rating && (
-              <Tag size="sm" colorScheme="green">
+              <Tag size="sm" colorScheme={!shop.isOpen ? "red" : "green"}>
                 <Icon as={FaStar} mr={1} />
                 {shop.rating.toFixed(1)}
+                {!shop.isOpen && (
+                  <Text ml={2} color="white" fontSize="xs">
+                    Closed
+                  </Text>
+                )}
               </Tag>
             )}
             {shop.estimatedDeliveryTime && (
@@ -245,16 +251,19 @@ const Home = () => {
     const fetchPopularShops = async () => {
       try {
         const shopsRef = collection(firestore, 'shops');
-        const popularShopsQuery = query(shopsRef, limit(4));
+        const popularShopsQuery = query(
+          shopsRef, 
+          orderBy('createdAt', 'asc'), // Order by creation timestamp, oldest first
+          limit(4)
+        );
         const querySnapshot = await getDocs(popularShopsQuery);
         
         const shops = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           rating: doc.data().rating || 4.0,
-          
         }));
-
+    
         setPopularShops(shops);
       } catch (error) {
         console.error('Error fetching popular shops:', error);

@@ -17,32 +17,29 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
 import Footer from "../../Components/footer/Footer";
 
-const ShopCard = ({ shop }) => (
-  <Link to={`/shop/${shop.id}`}>
-    <Box
-      borderWidth={1}
-      borderRadius="lg"
-      overflow="hidden"
-      boxShadow="md"
-      transition="all 0.3s ease"
-      _hover={{
-        transform: 'scale(1.05)',
-        boxShadow: 'xl',
-        borderColor: 'blue.500'
-      }}
-      height="100%"
-      display="flex"
-      flexDirection="column"
-      position="relative"  // Add this for absolute positioning of closed status
-    >
-      <Image
-        src={shop.imageUrl}
-        alt={shop.name}
-        h="250px"
-        w="100%"
-        objectFit="cover"
-      />
-      {!shop.isOpen && (
+const ShopCard = ({ shop }) => {
+  if (!shop.isOpen) {
+    return (
+      <Box
+        borderWidth={1}
+        borderRadius="lg"
+        overflow="hidden"
+        boxShadow="md"
+        height="100%"
+        display="flex"
+        flexDirection="column"
+        position="relative"
+        opacity={0.6}
+        cursor="not-allowed"
+      >
+        <Image
+          src={shop.imageUrl}
+          alt={shop.name}
+          h="250px"
+          w="100%"
+          objectFit="cover"
+          filter="grayscale(100%)"
+        />
         <Box
           position="absolute"
           top="0"
@@ -63,38 +60,91 @@ const ShopCard = ({ shop }) => (
             bg="blackAlpha.700"
             borderRadius="md"
           >
-            Closed at the moment
+            Coming Soon ..
           </Text>
         </Box>
-      )}
-      <Box 
-        p={4} 
-        flex="1" 
-        display="flex" 
-        flexDirection="column" 
-        justifyContent="center"
-      >
-        <Heading 
-          size="md" 
-          textAlign="center" 
-          color="gray.700"
+        <Box 
+          p={4} 
+          flex="1" 
+          display="flex" 
+          flexDirection="column" 
+          justifyContent="center"
         >
-          {shop.name}
-        </Heading>
-        {shop.description && (
-          <Text 
-            mt={2} 
+          <Heading 
+            size="md" 
             textAlign="center" 
-            color="gray.500" 
-            fontSize="sm"
+            color="gray.700"
           >
-            {shop.description}
-          </Text>
-        )}
+            {shop.name}
+          </Heading>
+          {shop.description && (
+            <Text 
+              mt={2} 
+              textAlign="center" 
+              color="gray.500" 
+              fontSize="sm"
+            >
+              {shop.description}
+            </Text>
+          )}
+        </Box>
       </Box>
-    </Box>
-  </Link>
-);
+    );
+  }
+
+  return (
+    <Link to={`/shop/${shop.id}`}>
+      <Box
+        borderWidth={1}
+        borderRadius="lg"
+        overflow="hidden"
+        boxShadow="md"
+        transition="all 0.3s ease"
+        _hover={{
+          transform: 'scale(1.05)',
+          boxShadow: 'xl',
+          borderColor: 'blue.500'
+        }}
+        height="100%"
+        display="flex"
+        flexDirection="column"
+      >
+        <Image
+          src={shop.imageUrl}
+          alt={shop.name}
+          h="250px"
+          w="100%"
+          objectFit="cover"
+        />
+        <Box 
+          p={4} 
+          flex="1" 
+          display="flex" 
+          flexDirection="column" 
+          justifyContent="center"
+        >
+          <Heading 
+            size="md" 
+            textAlign="center" 
+            color="gray.700"
+          >
+            {shop.name}
+          </Heading>
+          {shop.description && (
+            <Text 
+              mt={2} 
+              textAlign="center" 
+              color="gray.500" 
+              fontSize="sm"
+            >
+              {shop.description}
+            </Text>
+          )}
+        </Box>
+      </Box>
+    </Link>
+  );
+};
 
 const Main = () => {
   const [shops, setShops] = useState([]);
