@@ -177,7 +177,7 @@ const UserProfile = () => {
                   <Text>
                     {item.quantity}x {item.name}
                   </Text>
-                  <Text>${(item.price * item.quantity).toFixed(2)}</Text>
+                  <Text>Rs.{(item.price * item.quantity).toFixed(2)}</Text>
                 </Box>
               ))}
             </VStack>
@@ -188,7 +188,7 @@ const UserProfile = () => {
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Text fontWeight="bold">Total:</Text>
             <Text fontWeight="bold" fontSize="lg" color={useColorModeValue('green.600', 'green.300')}>
-              ${order.total.toFixed(2)}
+              Rs.{order.total.toFixed(2)}
             </Text>
           </Box>
 
@@ -294,17 +294,7 @@ const UserProfile = () => {
           <Text color="gray.500">View and track all your orders</Text>
         </Box>
 
-        {indexError && (
-          <Alert status="warning" borderRadius="md">
-            <AlertIcon />
-            <Box>
-              <Text>{indexError.message}</Text>
-              <Link href={indexError.link} isExternal color="blue.500">
-                Create Index <ExternalLinkIcon mx="2px" />
-              </Link>
-            </Box>
-          </Alert>
-        )}
+        
 
         <Tabs variant="enclosed-colored" colorScheme="blue">
           <TabList>
