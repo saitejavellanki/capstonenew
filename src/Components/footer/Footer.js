@@ -205,7 +205,7 @@ const Footer = () => {
                 fontSize="sm" 
                 _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
               >
-                Cancellation and Refund Policy.
+                Cancellation Policy.
               </Button>
               
             </VStack>
