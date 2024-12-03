@@ -144,6 +144,13 @@ const Cart = () => {
     return hash;
   };
 
+  const clearCart = () => {
+    localStorage.removeItem('cart');
+    setCartItems([]);
+    setGroupedItems({});
+    window.dispatchEvent(new Event('cartUpdate'));
+  };
+
   const initiatePayUPayment = async (shopData) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const txnid = `TXN_${Date.now()}`;
@@ -166,6 +173,10 @@ const Cart = () => {
       // Create the order first to get the order ID
       const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
       const transactionId = transactionRef.id;
+
+      window.onPaymentSuccess = () => {
+        clearCart(); // Clear the cart after successful payment
+      };
   
       const paymentParams = {
         key: PAYU_MERCHANT_KEY,
