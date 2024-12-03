@@ -175,7 +175,7 @@ const Cart = () => {
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: `http://localhost:5051/payment-success?transactionId=${txnid}`, // Use order ID here
+        surl: `https://fostservernew.onrender.com/payment-success?transactionId=${txnid}`, // Use order ID here
         furl: 'http://localhost:5001/payment-success',
       };
   

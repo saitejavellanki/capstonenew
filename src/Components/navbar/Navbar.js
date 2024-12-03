@@ -170,6 +170,10 @@ const Navbar = () => {
     </Button>
   );
 
+  const extractNameFromEmail = (email) => {
+    return email ? email.split('@')[0] : '';
+  };
+
   const NavContent = () => (
     <>
       <Menu>
@@ -181,7 +185,7 @@ const Navbar = () => {
               mr={2}
             />
             <Text fontWeight="medium" display={{ base: "none", md: "block" }}>
-              {user?.email}
+            {user?.email ? extractNameFromEmail(user.email) : ''}
             </Text>
           </Flex>
         </MenuButton>
