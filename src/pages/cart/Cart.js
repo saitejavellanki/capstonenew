@@ -144,12 +144,7 @@ const Cart = () => {
     return hash;
   };
 
-  const clearCart = () => {
-    localStorage.removeItem('cart');
-    setCartItems([]);
-    setGroupedItems({});
-    window.dispatchEvent(new Event('cartUpdate'));
-  };
+  
 
   const initiatePayUPayment = async (shopData) => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -166,7 +161,8 @@ const Cart = () => {
       paymentStatus: 'pending',
       customerEmail: user.email,
       createdAt: new Date(),
-      txnid: txnid
+      txnid: txnid,
+      clearCart: true 
     };
   
     try {
@@ -174,9 +170,7 @@ const Cart = () => {
       const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
       const transactionId = transactionRef.id;
 
-      window.onPaymentSuccess = () => {
-        clearCart(); // Clear the cart after successful payment
-      };
+      
   
       const paymentParams = {
         key: PAYU_MERCHANT_KEY,
@@ -209,6 +203,11 @@ const Cart = () => {
   
       document.body.appendChild(form);
       form.submit();
+
+      localStorage.removeItem('cart');
+    setCartItems([]);
+    setGroupedItems({});
+    window.dispatchEvent(new Event('cartUpdate'));
   
       
     } catch (error) {
