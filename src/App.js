@@ -170,7 +170,7 @@ function App() {
             }
           />
           
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Home />} />
         </Routes>
         </LoadingScreen>
         <Footer/>
