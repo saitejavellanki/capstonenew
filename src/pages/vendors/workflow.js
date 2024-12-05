@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Container,
   VStack,
@@ -45,7 +46,7 @@ import {
   AiOutlineStop,
   AiOutlineFire
 } from 'react-icons/ai';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 
 // Keep existing calculation functions
 const calculatePrepTime = (items) => {
@@ -413,10 +414,33 @@ const VendorOrderDashboard = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(firestore, 'orders', orderId);
+      const orderSnapshot = await getDoc(orderRef);
+      const orderData = orderSnapshot.data();
       await updateDoc(orderRef, {
         status: newStatus,
         updatedAt: new Date()
       });
+
+      if (newStatus === 'completed') {
+        try {
+          await axios.post('http://localhost:5052/sendnotification', {
+            orderId: orderId,
+            customerEmail: orderData.customer.email,
+            shopName: orderData.shopName || 'Our Shop', // Fallback shop name
+            customerName: orderData.customer.name,
+            items: orderData.items.map(item => `${item.quantity} x ${item.name}`).join(', ')
+          });
+        } catch (notificationError) {
+          console.error('Failed to send notification:', notificationError);
+          toast({
+            title: 'Notification Error',
+            description: 'Order is ready, but failed to send notification',
+            status: 'warning',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      }
       
       await fetchOrders();
       
