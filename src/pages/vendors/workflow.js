@@ -423,18 +423,39 @@ const VendorOrderDashboard = () => {
 
       if (newStatus === 'completed') {
         try {
-          await axios.post('http://localhost:5052/sendnotification', {
+          // Log the entire orderData for debugging
+          console.log('Full Order Data:', orderData);
+      
+          // Multiple strategies to extract email
+          const customerEmail = 
+            orderData.customer?.email || 
+            orderData.email || 
+            orderData.customerEmail || 
+            orderData.user?.email;
+      
+          if (!customerEmail) {
+            // If no email is found, throw a detailed error
+            console.error('No email fields found in order data:', Object.keys(orderData));
+            throw new Error('Customer email could not be found. Please check order details.');
+          }
+      
+          // Prepare notification payload
+          const notificationPayload = {
             orderId: orderId,
-            customerEmail: orderData.customer.email,
-            shopName: orderData.shopName || 'Our Shop', // Fallback shop name
-            customerName: orderData.customer.name,
-            items: orderData.items.map(item => `${item.quantity} x ${item.name}`).join(', ')
-          });
+            customerEmail: customerEmail,
+            shopName: orderData.shopName || 'Our Shop',
+            customerName: orderData.customer?.name || orderData.name || 'Customer',
+            items: orderData.items?.map(item => `${item.quantity} x ${item.name}`).join(', ') || 'No items',
+          };
+      
+          console.log('Notification Payload:', notificationPayload);
+      
+          await axios.post('http://localhost:5052/sendnotification', notificationPayload);
         } catch (notificationError) {
           console.error('Failed to send notification:', notificationError);
           toast({
             title: 'Notification Error',
-            description: 'Order is ready, but failed to send notification',
+            description: notificationError.message,
             status: 'warning',
             duration: 3000,
             isClosable: true,
