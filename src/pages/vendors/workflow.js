@@ -450,7 +450,7 @@ const VendorOrderDashboard = () => {
       
           console.log('Notification Payload:', notificationPayload);
       
-          await axios.post('http://localhost:5052/sendnotification', notificationPayload);
+          await axios.post('https://fostservernew.onrender.com/sendnotification', notificationPayload);
         } catch (notificationError) {
           console.error('Failed to send notification:', notificationError);
           toast({
