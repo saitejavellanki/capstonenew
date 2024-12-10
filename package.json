@@ -29,6 +29,7 @@
     "lucide-react": "^0.460.0",
     "mongoose": "^8.7.1",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.16",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "qrcode.react": "^4.1.0",
