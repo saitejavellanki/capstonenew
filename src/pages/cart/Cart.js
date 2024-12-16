@@ -99,7 +99,11 @@ const Cart = () => {
   };
 
   const updateQuantity = (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
+    // Automatically remove item if quantity drops to 0
+    if (newQuantity === 0) {
+      removeFromCart(itemId);
+      return;
+    }
     
     const updatedCart = cartItems.map(item => 
       item.id === itemId ? { ...item, quantity: newQuantity } : item
@@ -263,7 +267,7 @@ const Cart = () => {
             </Text>
           </VStack>
   
-          {/* Right side controls - quantity, price, delete */}
+          {/* Right side controls - quantity, price */}
           <Flex 
             align="center" 
             gap={{ base: 2, md: 6 }}
@@ -295,16 +299,6 @@ const Cart = () => {
             >
               Rs {(item.price * item.quantity).toFixed(2)}
             </Text>
-            
-            {/* Delete button */}
-            <IconButton
-              variant="ghost"
-              colorScheme="red"
-              icon={<Trash2 size={20} />}
-              onClick={() => removeFromCart(item.id)}
-              aria-label="Remove item"
-              flexShrink={0}
-            />
           </Flex>
         </Flex>
       </Flex>
