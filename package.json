@@ -25,6 +25,7 @@
     "express": "^4.21.1",
     "firebase": "^10.13.0",
     "framer-motion": "^11.3.28",
+    "heroicons": "^2.2.0",
     "https-browserify": "^1.0.0",
     "lucide-react": "^0.460.0",
     "mongoose": "^8.7.1",
