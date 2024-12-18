@@ -170,7 +170,7 @@ function App() {
             }
           />
           
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </LoadingScreen>
         <Footer/>

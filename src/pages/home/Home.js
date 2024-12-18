@@ -241,10 +241,14 @@ const Home = () => {
   const [isTutorialOpen, setIsTutorialOpen] = useState(true);
   const restaurantButtonRef = React.useRef(null);
 
+  
+
   const bgGradient = useColorModeValue(
     'linear(to-br, green.50, teal.50, blue.50)',
     'linear(to-br, green.900, teal.900, blue.900)'
   );
+
+  
 
   // Fetch Popular Shops
   useEffect(() => {
@@ -492,16 +496,10 @@ const Home = () => {
               color="teal.800"
               lineHeight="shorter"
             >
-              Order right from your table!
+              Less Waiting, More Eating!
             </Heading>
 
-            <Text 
-              color="gray.600" 
-              fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
-              maxW="700px"
-            >
-              Discover local restaurants, place orders seamlessly, and enjoy your dining experience like never before.
-            </Text>
+            
 
             
           </VStack>
@@ -513,59 +511,62 @@ const Home = () => {
         arrowDirection="right"
       /> */}
 
-          <SimpleGrid 
-            columns={{ base: 1, sm: 2, lg: 4 }}
-            spacing={{ base: 4, md: 6, lg: 8 }}
-            w="full"
-            maxW="1400px"
-            mx="auto"
-            px={{ base: 4, md: 6, lg: 8 }}
-          >
-            {FOOD_CATEGORIES.map((category, index) => (
-              <Flex
-                key={index}
-                bg="white"
-                p={{ base: 4, lg: 6 }}
-                borderRadius="xl"
-                boxShadow="md"
-                align="center"
-                cursor="pointer"
-                onClick={() => navigate('/main')}
-                transition="all 0.3s ease"
-                h={{ base: "100px", lg: "140px" }}
-                w="full"
-                _hover={{
-                  transform: 'translateY(-5px)',
-                  boxShadow: 'lg'
-                }}
-              >
-                <Icon 
-                  as={category.icon} 
-                  color="green.500" 
-                  boxSize={{ base: 8, lg: 12 }} 
-                  mr={{ base: 3, lg: 5 }} 
-                />
-                <VStack 
-                  align="start" 
-                  spacing={1} 
-                  flex={1}
-                >
-                  <Text 
-                    fontWeight="bold" 
-                    fontSize={{ base: 'lg', lg: '2xl' }}
-                  >
-                    {category.title}
-                  </Text>
-                  <Text 
-                    fontSize={{ base: 'md', lg: 'lg' }} 
-                    color="gray.500"
-                  >
-                    {category.description}
-                  </Text>
-                </VStack>
-              </Flex>
-            ))}
-          </SimpleGrid>
+<SimpleGrid
+      columns={{ base: 1, sm: 2, lg: 4 }}
+      spacing={6}
+      w="full"
+      maxW="1400px"
+      mx="auto"
+      px={4}
+      bg="white"
+      py={8}
+    >
+      {FOOD_CATEGORIES.map((category, index) => (
+        <Flex
+          key={index}
+          bg="orange.50"
+          p={6}
+          borderRadius="xl"
+          border="2px solid"
+          borderColor="orange.100"
+          alignItems="center"
+          flexDirection="column"
+          textAlign="center"
+          cursor="pointer"
+          transition="all 0.3s ease"
+          _hover={{
+            transform: 'translateY(-10px)',
+            boxShadow: 'xl',
+            bg: 'orange.100'
+          }}
+          onClick={() => navigate('/main')}
+        >
+          <Icon
+            as={category.icon}
+            color="orange.500"
+            boxSize={16}
+            mb={4}
+            opacity={0.8}
+          />
+          <VStack spacing={2} alignItems="center">
+            <Text 
+              fontWeight="bold" 
+              fontSize="2xl" 
+              color="orange.700"
+            >
+              {category.title}
+            </Text>
+            <Text 
+              color="orange.600" 
+              fontSize="md"
+            >
+              {category.description}
+            </Text>
+          </VStack>
+        </Flex>
+      ))}
+    </SimpleGrid>
+
           
         </VStack>
 
@@ -596,15 +597,21 @@ const Home = () => {
         </Box>
         {/* Added Pickup Warning */}
         <Alert status="warning" borderRadius="lg" marginTop={7}>
-              <AlertIcon />
-              <Box>
-                <AlertTitle>Pickup Only Service</AlertTitle>
-                <AlertDescription>
-                  We do not offer delivery. Orders are prepared for in-store pickup. 
-                  Use our app to order, skip the line, and pick up your food with a unique QR code!
-                </AlertDescription>
-              </Box>
-            </Alert>
+  <AlertIcon />
+  <Box>
+    <AlertTitle>Pickup Only Service</AlertTitle>
+    <AlertDescription>
+      We do not offer delivery. Orders are prepared for in-store pickup. 
+      Use our app to order, skip the line, and pick up your food with a unique QR code!
+      <HStack mt={2} alignItems="center" spacing={2}>
+        <Icon as={FaStar} color="green.500" />
+        <Text fontSize="sm" color="gray.600">
+          Licensed under FSSAI License No. 23624032004962
+        </Text>
+      </HStack>
+    </AlertDescription>
+  </Box>
+</Alert>
         <Modal
           isOpen={isOrderModalOpen}
           onClose={() => setIsOrderModalOpen(false)}

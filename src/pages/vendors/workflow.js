@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Container,
   VStack,
@@ -45,7 +46,7 @@ import {
   AiOutlineStop,
   AiOutlineFire
 } from 'react-icons/ai';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 
 // Keep existing calculation functions
 const calculatePrepTime = (items) => {
@@ -413,10 +414,54 @@ const VendorOrderDashboard = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(firestore, 'orders', orderId);
+      const orderSnapshot = await getDoc(orderRef);
+      const orderData = orderSnapshot.data();
       await updateDoc(orderRef, {
         status: newStatus,
         updatedAt: new Date()
       });
+
+      if (newStatus === 'completed') {
+        try {
+          // Log the entire orderData for debugging
+          console.log('Full Order Data:', orderData);
+      
+          // Multiple strategies to extract email
+          const customerEmail = 
+            orderData.customer?.email || 
+            orderData.email || 
+            orderData.customerEmail || 
+            orderData.user?.email;
+      
+          if (!customerEmail) {
+            // If no email is found, throw a detailed error
+            console.error('No email fields found in order data:', Object.keys(orderData));
+            throw new Error('Customer email could not be found. Please check order details.');
+          }
+      
+          // Prepare notification payload
+          const notificationPayload = {
+            orderId: orderId,
+            customerEmail: customerEmail,
+            shopName: orderData.shopName || 'Our Shop',
+            customerName: orderData.customer?.name || orderData.name || 'Customer',
+            items: orderData.items?.map(item => `${item.quantity} x ${item.name}`).join(', ') || 'No items',
+          };
+      
+          console.log('Notification Payload:', notificationPayload);
+      
+          await axios.post('https://fostservernew.onrender.com/sendnotification', notificationPayload);
+        } catch (notificationError) {
+          console.error('Failed to send notification:', notificationError);
+          toast({
+            title: 'Notification Error',
+            description: notificationError.message,
+            status: 'warning',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      }
       
       await fetchOrders();
       
