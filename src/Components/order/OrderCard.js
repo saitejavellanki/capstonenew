@@ -58,7 +58,7 @@ const OrderCard = ({ order, updateOrderStatus, onCompleteOrder, onScanQR }) => (
       <HStack justify="space-between">
         <Text fontWeight="bold">Total Amount:</Text>
         <Text fontWeight="bold" color="green.600">
-          ${order.total.toFixed(2)}
+          ${order.total !== undefined ? order.total.toFixed(2):"N/A"}
         </Text>
       </HStack>
 
