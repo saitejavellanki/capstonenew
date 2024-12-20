@@ -779,6 +779,7 @@ const Home = () => {
               px={8}
               fontSize="lg"
               height="60px"
+              onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
               _hover={{
                 transform: 'translateY(-2px)',
                 boxShadow: 'lg',
@@ -822,6 +823,7 @@ const Home = () => {
                 <Button
                   colorScheme="orange"
                   size="lg"
+                  onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
                   _hover={{
                     transform: 'translateY(-2px)',
                     boxShadow: 'lg',
@@ -833,6 +835,7 @@ const Home = () => {
                   variant="outline"
                   colorScheme="orange"
                   size="lg"
+                  onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
                   _hover={{
                     transform: 'translateY(-2px)',
                     boxShadow: 'lg',

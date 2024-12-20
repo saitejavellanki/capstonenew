@@ -87,7 +87,7 @@ function App() {
         <ScrollToTop /> 
         
         <LoadingScreen>
-        <Navbar />
+        {/* <Navbar /> */}
         <Routes>
            <Route path="/" element={<Home />} />
         </Routes>
@@ -178,7 +178,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes> */}
         </LoadingScreen>
-        <Footer/>
+        {/* <Footer/> */}
       </BrowserRouter>
     </ChakraProvider>
   );
