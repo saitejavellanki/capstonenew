@@ -32,6 +32,7 @@ import LoadingScreen from './pages/utils/loading';
 import CancellationPolicy from './pages/utils/Refund';
 import PaymentSuccess from './pages/utils/PaymentSuccess';
 import Reset from './pages/Auth/Reset';
+import VendorCounterOrder from './pages/vendors/VendorCounterOrder';
 
 
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -88,6 +89,9 @@ function App() {
         <LoadingScreen>
         <Navbar />
         <Routes>
+           <Route path="/" element={<Home />} />
+        </Routes>
+        {/* <Routes>
         
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -104,6 +108,7 @@ function App() {
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
           <Route path="/refund" element={<CancellationPolicy />} />
           <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
+          <Route path="/counter" element={<VendorCounterOrder />} />
           <Route 
             path="/vendor/dashboard" 
             element={
@@ -171,7 +176,7 @@ function App() {
           />
           
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        </Routes> */}
         </LoadingScreen>
         <Footer/>
       </BrowserRouter>
