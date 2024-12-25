@@ -41,6 +41,8 @@ import {
   XCircle 
 } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
+import BannerCarousel from '../../Components/banner/Banner';
+import Recommendations from '../../Components/recommendations/Recommendations';
 
 const OrderWaitingPage = () => {
   const [orderStatus, setOrderStatus] = useState('pending');
@@ -347,6 +349,8 @@ const OrderWaitingPage = () => {
             </ModalBody>
           </ModalContent>
         </Modal>
+        <BannerCarousel/>
+        <Recommendations/>
       </VStack>
     </Container>
   );

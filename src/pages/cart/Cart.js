@@ -28,6 +28,7 @@ import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
+import CouponComponent from '../../Components/coupon/CouponComponent';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -35,7 +36,7 @@ const Cart = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedShop, setSelectedShop] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
- 
+  const [discountAmount, setDiscountAmount] = useState(0);
   const toast = useToast();
   const firestore = getFirestore();
   const navigate = useNavigate();
@@ -51,26 +52,31 @@ const Cart = () => {
 
   useEffect(() => {
     const loadCart = () => {
-      const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      // Initialize with empty array if cart is null/undefined
+      const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
       setCartItems(savedCart);
       
-      const grouped = savedCart.reduce((acc, item) => {
-        const shopId = item.shopId;
-        if (!acc[shopId]) {
-          acc[shopId] = {
-            items: [],
-            shopName: item.shopName,
-            total: 0
-          };
-        }
-        acc[shopId].items.push(item);
-        acc[shopId].total += item.price * item.quantity;
-        return acc;
-      }, {});
-      
-      setGroupedItems(grouped);
+      // Only perform reduce if savedCart has items
+      if (savedCart.length > 0) {
+        const grouped = savedCart.reduce((acc, item) => {
+          const shopId = item.shopId;
+          if (!acc[shopId]) {
+            acc[shopId] = {
+              items: [],
+              shopName: item.shopName,
+              total: 0
+            };
+          }
+          acc[shopId].items.push(item);
+          acc[shopId].total += item.price * item.quantity;
+          return acc;
+        }, {});
+        setGroupedItems(grouped);
+      } else {
+        setGroupedItems({});
+      }
     };
-
+  
     loadCart();
   }, []);
 
@@ -354,14 +360,54 @@ const Cart = () => {
                     </Text>
                   </Text>
                   
-                  <Button
+                  <Box pt={4}>
+  <CouponComponent 
+    total={shopData.total} 
+    onCouponApply={(amount) => setDiscountAmount(amount)} 
+  />
+  
+  <Flex 
+    direction={{ base: "column", md: "row" }}
+    justify="space-between"
+    align={{ base: "stretch", md: "center" }}
+    gap={4}
+  >
+    <VStack align="start" spacing={1}>
+      <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
+        Subtotal for {shopData.shopName}:
+        <Text as="span" ml={2}>
+          Rs {shopData.total.toFixed(2)}
+        </Text>
+      </Text>
+      {discountAmount > 0 && (
+        <Text color="green.600" fontSize={{ base: "md", md: "lg" }}>
+          Discount: Rs {discountAmount.toFixed(2)}
+        </Text>
+      )}
+      <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="green.600">
+        Final Total: Rs {(shopData.total - discountAmount).toFixed(2)}
+      </Text>
+    </VStack>
+    
+    <Button
+      colorScheme="blue"
+      size={{ base: "md", md: "lg" }}
+      width={{ base: "full", md: "auto" }}
+      onClick={() => handlePlaceOrder(shopId, {...shopData, total: shopData.total - discountAmount})}
+    >
+      Place Order
+    </Button>
+  </Flex>
+</Box>
+
+                  {/* <Button
                     colorScheme="blue"
                     size={{ base: "md", md: "lg" }}
                     width={{ base: "full", md: "auto" }}
                     onClick={() => handlePlaceOrder(shopId, shopData)}
                   >
                     Place Order
-                  </Button>
+                  </Button> */}
                 </Flex>
               </Box>
             </VStack>

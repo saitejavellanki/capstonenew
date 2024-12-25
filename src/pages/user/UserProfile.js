@@ -27,6 +27,7 @@ import {
 } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { format } from 'date-fns';
+import UserLevelStatus from './UserLevelStatus';
 
 const UserProfile = () => {
   const [orders, setOrders] = useState([]);
@@ -294,7 +295,7 @@ const UserProfile = () => {
           <Text color="gray.500">View and track all your orders</Text>
         </Box>
 
-        
+        <UserLevelStatus orderCount={orders.length} />
 
         <Tabs variant="enclosed-colored" colorScheme="blue">
           <TabList>

@@ -33,6 +33,7 @@ import CancellationPolicy from './pages/utils/Refund';
 import PaymentSuccess from './pages/utils/PaymentSuccess';
 import Reset from './pages/Auth/Reset';
 import VendorCounterOrder from './pages/vendors/VendorCounterOrder';
+import AddCouponForm from './pages/utils/AddCoupon';
 
 
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -87,11 +88,8 @@ function App() {
         <ScrollToTop /> 
         
         <LoadingScreen>
-        {/* <Navbar /> */}
+        <Navbar />
         <Routes>
-           <Route path="/" element={<Home />} />
-        </Routes>
-        {/* <Routes>
         
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -109,6 +107,7 @@ function App() {
           <Route path="/refund" element={<CancellationPolicy />} />
           <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
           <Route path="/counter" element={<VendorCounterOrder />} />
+          <Route path="/addcoupon" element={<AddCouponForm />} />
           <Route 
             path="/vendor/dashboard" 
             element={
@@ -176,9 +175,9 @@ function App() {
           />
           
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes> */}
+        </Routes>
         </LoadingScreen>
-        {/* <Footer/> */}
+        <Footer/>
       </BrowserRouter>
     </ChakraProvider>
   );

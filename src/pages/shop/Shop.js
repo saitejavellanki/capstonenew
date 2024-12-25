@@ -42,6 +42,7 @@ import {
 import { ViewColumnsIcon } from '@heroicons/react/24/outline';
 import { app } from '../../Components/firebase/Firebase';
 
+import ShopItemCard from '../../Components/shopitemcard/ShopItemCard';
 // const FOOD_CATEGORIES = [
 //   "Beverages",
 //   "Appetizers",
@@ -382,182 +383,98 @@ const Shop = () => {
     </Box>
   );
 };
-  return (
-    <Container maxW="container.xl" py={8} position="relative" pb={20}>
-      <VStack spacing={8} align="stretch">
-        {loading ? (
-          <Flex justify="center" align="center" height="200px">
-            <Spinner size="xl" />
-          </Flex>
-        ) : error ? (
-          <Alert status="error" variant="left-accent">
-            <AlertIcon />
-            <Text>{error}</Text>
-          </Alert>
-        ) : (
-          <>
-            {/* Shop Header - Existing code */}
-            {shopDetails && (
-              <Box 
-                position="relative" 
-                height="300px" 
-                mb={6} 
-                borderRadius="xl" 
-                overflow="hidden"
-              >
-                <Image 
-                  src={shopDetails.imageUrl} 
-                  alt={shopDetails.name}
-                  w="100%"
-                  h="100%"
-                  objectFit="cover"
-                />
-                <Box
-                  position="absolute"
-                  bottom={0}
-                  left={0}
-                  right={0}
-                  bg="blackAlpha.700"
-                  p={6}
-                >
-                  <Heading color="white" size="xl">
-                    {shopDetails.name}
-                  </Heading>
-                  {shopDetails.description && (
-                    <Text 
-                      color="whiteAlpha.900" 
-                      mt={2} 
-                      fontSize="lg"
-                    >
-                      {shopDetails.description}
-                    </Text>
-                  )}
-                </Box>
-              </Box>
-            )}
-
-            {/* Categorized Items Section */}
-            <Box>
-          {items.length === 0 ? (
-            <Alert status="info" variant="left-accent">
-              <AlertIcon />
-              <Text>No items available in this shop at the moment.</Text>
-            </Alert>
-          ) : (
-            Object.keys(categorizedItems)
-              .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
-              .map(category => (
-                <Box 
-                  key={category} 
-                  mb={8}
-                  ref={el => categoryRefs.current[category] = el}
-                >
-                  <Heading size="lg" mb={6}>{category}</Heading>
-                  <VStack spacing={4} align="stretch">
-                    {categorizedItems[category].map((item) => (
-                      <Box
-                        key={item.id}
-                        borderWidth="1px"
-                        borderRadius="lg"
-                        overflow="hidden"
-                        boxShadow="sm"
-                        transition="all 0.2s"
-                        opacity={item.isActive === false ? 0.5 : 1}
-                        _hover={{
-                          transform: item.isActive === false ? 'none' : 'translateY(-2px)',
-                          boxShadow: item.isActive === false ? 'sm' : 'md',
-                        }}
-                        bg="white"
-                        position="relative"
-                      >
-                        {item.isActive === false && (
-                          <Badge 
-                            position="absolute" 
-                            top={2} 
-                            right={2} 
-                            colorScheme="red"
-                            zIndex={10}
-                          >
-                            Unavailable
-                          </Badge>
-                        )}
-                        <Flex direction="row">
-                          <Box 
-                            width="120px"
-                            height="120px"
-                            flexShrink={0}
-                            borderRadius="md"
-                            overflow="hidden"
-                            filter={item.isActive === false ? 'grayscale(100%)' : 'none'}
-                          >
-                            <Image
-                              src={item.imageUrl}
-                              alt={item.name}
-                              width="100%"
-                              height="100%"
-                              objectFit="cover"
-                              cursor={item.isActive === false ? 'not-allowed' : 'pointer'}
-                              onClick={() => handleItemClick(item)}
-                            />
-                          </Box>
-
-                          <Flex 
-                            flex="1" 
-                            ml={4}
-                            direction="column"
-                            justify="space-between"
-                          >
-                            <Box>
-                              <Heading size="sm" mb={1}>
-                                {item.name}
-                              </Heading>
-                              <Badge 
-              colorScheme={item.dietType === 'veg' ? 'green' : 'red'}
+return (
+  <Container maxW="container.xl" py={8} position="relative" pb={20}>
+    <VStack spacing={8} align="stretch">
+      {loading ? (
+        <Flex justify="center" align="center" height="200px">
+          <Spinner size="xl" />
+        </Flex>
+      ) : error ? (
+        <Alert status="error" variant="left-accent">
+          <AlertIcon />
+          <Text>{error}</Text>
+        </Alert>
+      ) : (
+        <>
+          {/* Shop Header */}
+          {shopDetails && (
+            <Box 
+              position="relative" 
+              height="300px" 
+              mb={6} 
+              borderRadius="xl" 
+              overflow="hidden"
             >
-              {item.dietType === 'veg' ? 'Veg' : 'Non-Veg'}
-            </Badge>
-                              <Text 
-                                color="gray.600" 
-                                noOfLines={2}
-                                mb={2}
-                                fontSize="sm"
-                              >
-                                {item.description}
-                              </Text>
-                            </Box>
-
-                            <Flex 
-                              justify="space-between" 
-                              align="center"
-                              mt="auto"
-                            >
-                              <Text
-                                color={item.isActive === false ? "gray.400" : "green.600"}
-                                fontSize="2xl"
-                                fontWeight="bold"
-                                textDecoration={item.isActive === false ? "line-through" : "none"}
-                              >
-                                Rs.{item.price.toFixed(2)}
-                              </Text>
-                              <Button
-                                colorScheme="blue"
-                                onClick={() => addToCart(item)}
-                                size="sm"
-                                width="auto"
-                                isDisabled={item.isActive === false}
-                              >
-                                {item.isActive === false ? 'Unavailable' : 'Add to Cart'}
-                              </Button>
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                      </Box>
-                    ))}
-                  </VStack>
-                </Box>
-              ))
+              <Image 
+                src={shopDetails.imageUrl} 
+                alt={shopDetails.name}
+                w="100%"
+                h="100%"
+                objectFit="cover"
+              />
+              <Box
+                position="absolute"
+                bottom={0}
+                left={0}
+                right={0}
+                bg="blackAlpha.700"
+                p={6}
+              >
+                <Heading color="white" size="xl">
+                  {shopDetails.name}
+                </Heading>
+                {shopDetails.description && (
+                  <Text 
+                    color="whiteAlpha.900" 
+                    mt={2} 
+                    fontSize="lg"
+                  >
+                    {shopDetails.description}
+                  </Text>
+                )}
+              </Box>
+            </Box>
           )}
-        </Box>
+
+          {/* Categorized Items Section */}
+          <Box>
+            {items.length === 0 ? (
+              <Alert status="info" variant="left-accent">
+                <AlertIcon />
+                <Text>No items available in this shop at the moment.</Text>
+              </Alert>
+            ) : (
+              Object.keys(categorizedItems)
+                .filter(category => categorizedItems[category].length > 0 && category !== 'Uncategorized')
+                .map(category => (
+                  <Box 
+                    key={category} 
+                    mb={8}
+                    ref={el => categoryRefs.current[category] = el}
+                  >
+                    <Heading size="lg" mb={6}>{category}</Heading>
+                    <Grid 
+                      templateColumns={{
+                        base: "1fr",
+                        md: "repeat(2, 1fr)",
+                        lg: "repeat(3, 1fr)"
+                      }}
+                      gap={6}
+                    >
+                      {categorizedItems[category].map((item) => (
+                        <ShopItemCard
+                          key={item.id}
+                          item={item}
+                          onAddToCart={addToCart}
+                          onItemClick={handleItemClick}
+                        />
+                      ))}
+                    </Grid>
+                  </Box>
+                ))
+            )}
+          </Box>
 
             {/* Category Navigation */}
             <CategoryNavigation />
