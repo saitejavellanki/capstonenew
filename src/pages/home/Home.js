@@ -51,6 +51,7 @@ import BannerCarousel from '../../Components/banner/Banner';
 import PremiumRecommendations from '../../Components/recommendations/PremiumRecommendations';
 
 
+
 // Motion components
 const MotionBox = chakra(motion.div);
 const MotionFlex = chakra(motion.div);
@@ -498,6 +499,7 @@ const Home = () => {
           w="full"
           pt={{ base: 4, md: 8, lg: 12 }}
         >
+          
           <BannerCarousel/>
           {/* <VStack spacing={6} maxW="800px">
             <Heading
@@ -586,7 +588,7 @@ const Home = () => {
           
           </>
         )}
-        <PremiumRecommendations/>
+        {/* <PremiumRecommendations/> */}
         {/* Popular Restaurants Section */}
         <Box mt={{ base: 8, md: 12, lg: 16 }}>
           <Heading 
