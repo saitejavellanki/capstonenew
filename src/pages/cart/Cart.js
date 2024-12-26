@@ -221,6 +221,7 @@ const Cart = () => {
   
       
     } catch (error) {
+      console.error('Payment initiation error:', error);
       toast({
         title: 'Error',
         description: 'Failed to place order. Please try again.',
