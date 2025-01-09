@@ -191,7 +191,7 @@ const Cart = () => {
         email: user.email,
         phone: user.phoneNumber || '',
         surl: `https://fostservernew.onrender.com/payment-success?transactionId=${txnid}`, // Use order ID here
-        furl: 'http://localhost:5001/payment-success',
+        furl: 'https://main.d15io2iwu35boj.amplifyapp.com/',
       };
   
       // Generate hash
@@ -221,6 +221,7 @@ const Cart = () => {
   
       
     } catch (error) {
+      console.error('Payment initiation error:', error);
       toast({
         title: 'Error',
         description: 'Failed to place order. Please try again.',

@@ -22,13 +22,15 @@ import {
   VStack,
   HStack,
   Badge,
-  useToast
+  useToast,
+  Image
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import { app } from '../firebase/Firebase';
 import { Menu as MenuIcon, ShoppingCart } from 'lucide-react';
+import sai from "../../Assets/Fos_t-removebg-preview.png"
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -300,9 +302,15 @@ const Navbar = () => {
           transition="all 0.3s ease"
         >
           <Flex align="center" mr={5}>
-            <Text fontSize="lg" fontWeight="bold">
-              <Link to="/">FOST</Link>
-            </Text>
+            <Link to="/">
+              <Image
+                src={sai} // Replace with your logo path
+                alt="Logo"
+                height="60px" // Adjust size as needed
+                width="auto"
+                objectFit="contain"
+              />
+            </Link>
           </Flex>
 
           {isMobile ? (
