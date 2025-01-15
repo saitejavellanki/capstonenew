@@ -12,11 +12,31 @@ import {
   Badge,
   useBreakpointValue,
 } from '@chakra-ui/react';
-import { FaCartPlus, FaHeart, FaFire } from 'react-icons/fa';
+import { FaCartPlus, FaStar } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
+
+// Star Rating Component
+const StarRating = ({ rating }) => {
+  return (
+    <HStack spacing={1}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Icon
+          key={star}
+          as={FaStar}
+          color={star <= rating ? "yellow.400" : "gray.200"}
+          w={3}
+          h={3}
+        />
+      ))}
+      <Text fontSize="xs" color="gray.600" ml={1}>
+        {rating?.toFixed(1) || '0.0'}
+      </Text>
+    </HStack>
+  );
+};
 
 const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -46,32 +66,43 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
             objectFit="cover"
             onClick={() => onItemClick(item)}
           />
-          {item.isActive === false && (
-            <Badge
-              position="absolute"
-              top={2}
-              right={2}
-              colorScheme="red"
-              fontSize="xs"
-              px={2}
-              py={1}
-              borderRadius="full"
-            >
-              Unavailable
-            </Badge>
-          )}
-          <Badge
+          <Box
             position="absolute"
             top={2}
             left={2}
-            colorScheme={item.dietType === 'veg' ? 'green' : 'red'}
-            fontSize="xs"
-            px={2}
-            py={1}
-            borderRadius="full"
+            right={2}
+            display="flex"
+            justifyContent="space-between"
+            gap={2}
           >
-            {item.dietType === 'veg' ? 'Veg' : 'Non-Veg'}
-          </Badge>
+            <Box 
+              bg="white" 
+              borderRadius="full" 
+              w="2" 
+              h="2" 
+              border="1px"
+              borderColor={item.dietType === 'veg' ? 'green.500' : 'red.500'}
+            >
+              <Box
+                w="1"
+                h="1"
+                borderRadius="full"
+                bg={item.dietType === 'veg' ? 'green.500' : 'red.500'}
+                m="0.5"
+              />
+            </Box>
+            {item.isActive === false && (
+              <Badge
+                colorScheme="red"
+                fontSize="xs"
+                px={2}
+                py={0.5}
+                borderRadius="full"
+              >
+                Unavailable
+              </Badge>
+            )}
+          </Box>
         </Box>
 
         {/* Right side - Content */}
@@ -85,7 +116,8 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
             <Heading size="sm" noOfLines={1}>
               {item.name}
             </Heading>
-            <Text fontSize="xs" color="gray.600" noOfLines={2}>
+            <StarRating rating={item.averageRating} />
+            <Text fontSize="xs" color="gray.600" noOfLines={1}>
               {item.description}
             </Text>
           </VStack>
@@ -173,32 +205,54 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
           opacity={isHovered ? 1 : 0}
           transition="0.3s"
         />
-        {item.isActive === false && (
-          <Badge
-            position="absolute"
-            top={2}
-            right={2}
-            colorScheme="red"
-            fontSize="xs"
-            px={2}
-            py={1}
-            borderRadius="full"
-          >
-            Unavailable
-          </Badge>
-        )}
-        <Badge
+        <Box
           position="absolute"
           top={2}
           left={2}
-          colorScheme={item.dietType === 'veg' ? 'green' : 'red'}
-          fontSize="xs"
+          right={2}
+          display="flex"
+          justifyContent="space-between"
+          gap={2}
+        >
+          <Box 
+            bg="white" 
+            borderRadius="full" 
+            w="3" 
+            h="3" 
+            border="1px"
+            borderColor={item.dietType === 'veg' ? 'green.500' : 'red.500'}
+          >
+            <Box
+              w="1.5"
+              h="1.5"
+              borderRadius="full"
+              bg={item.dietType === 'veg' ? 'green.500' : 'red.500'}
+              m="0.5"
+            />
+          </Box>
+          {item.isActive === false && (
+            <Badge
+              colorScheme="red"
+              fontSize="xs"
+              px={2}
+              py={0.5}
+              borderRadius="full"
+            >
+              Unavailable
+            </Badge>
+          )}
+        </Box>
+        <Box
+          position="absolute"
+          bottom={2}
+          left={2}
+          bg="white"
           px={2}
           py={1}
-          borderRadius="full"
+          borderRadius="md"
         >
-          {item.dietType === 'veg' ? 'Veg' : 'Non-Veg'}
-        </Badge>
+          <StarRating rating={item.averageRating} />
+        </Box>
       </Box>
 
       <VStack 

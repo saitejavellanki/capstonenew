@@ -32,7 +32,6 @@ import {
 import { FaUtensils, FaGift, FaShoppingBag, FaEye, FaStar, FaClock } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
 import TutorialOverlay from "../utils/TutorialOverlay"
 import Slider from 'react-slick';
 import { 
@@ -46,10 +45,6 @@ import {
   limit
 } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
-import Recommendations from '../../Components/recommendations/Recommendations';
-import BannerCarousel from '../../Components/banner/Banner';
-import PremiumRecommendations from '../../Components/recommendations/PremiumRecommendations';
-
 
 
 // Motion components
@@ -245,7 +240,7 @@ const Home = () => {
   const firestore = getFirestore(app);
   const [isTutorialOpen, setIsTutorialOpen] = useState(true);
   const restaurantButtonRef = React.useRef(null);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
   
 
   const bgGradient = useColorModeValue(
@@ -270,7 +265,7 @@ const Home = () => {
         const shops = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          rating: doc.data().rating || 4.0,
+          // rating: doc.data().rating || 4.0,
         }));
     
         setPopularShops(shops);
@@ -282,11 +277,6 @@ const Home = () => {
     fetchPopularShops();
   }, [firestore]);
 
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    setIsUserLoggedIn(!!user);
-  }, []);
   // Fetch Active Orders
   useEffect(() => {
     const fetchActiveOrders = async () => {
@@ -499,9 +489,7 @@ const Home = () => {
           w="full"
           pt={{ base: 4, md: 8, lg: 12 }}
         >
-          
-          <BannerCarousel/>
-          {/* <VStack spacing={6} maxW="800px">
+          <VStack spacing={6} maxW="800px">
             <Heading
               fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
               fontWeight="black"
@@ -514,7 +502,7 @@ const Home = () => {
             
 
             
-          </VStack> */}
+          </VStack>
           {/* <TutorialOverlay
         isOpen={isTutorialOpen}
         onClose={() => setIsTutorialOpen(false)}
@@ -581,14 +569,7 @@ const Home = () => {
 
           
         </VStack>
-        
-        {isUserLoggedIn && (
-          <>
-            <Recommendations />
-          
-          </>
-        )}
-        {/* <PremiumRecommendations/> */}
+
         {/* Popular Restaurants Section */}
         <Box mt={{ base: 8, md: 12, lg: 16 }}>
           <Heading 
@@ -681,3 +662,194 @@ const Home = () => {
 };
 
 export default Home;
+
+
+// import React from 'react';
+// import {
+//   Box,
+//   Button,
+//   Container,
+//   Flex,
+//   Heading,
+//   Text,
+//   VStack,
+//   Icon,
+//   SimpleGrid,
+//   useColorModeValue,
+//   chakra,
+//   HStack,
+//   Badge,
+// } from '@chakra-ui/react';
+// import { FaClock, FaQrcode, FaMobile, FaUtensils } from 'react-icons/fa';
+// import { motion } from 'framer-motion';
+
+// // Motion components
+// const MotionBox = chakra(motion.div);
+// const MotionFlex = chakra(motion.div);
+
+// // Feature Card Component
+// const FeatureCard = ({ icon, title, description }) => (
+//   <MotionBox
+//     bg="white"
+//     p={6}
+//     borderRadius="xl"
+//     boxShadow="lg"
+//     whileHover={{ y: -5 }}
+//     transition="all 0.3s ease"
+//     border="2px solid"
+//     borderColor="orange.100"
+//   >
+//     <VStack spacing={4} align="center" textAlign="center">
+//       <Icon as={icon} boxSize={10} color="orange.500" />
+//       <Text fontSize="xl" fontWeight="bold" color="orange.700">
+//         {title}
+//       </Text>
+//       <Text color="gray.600">
+//         {description}
+//       </Text>
+//     </VStack>
+//   </MotionBox>
+// );
+
+// const Home = () => {
+//   const features = [
+//     {
+//       icon: FaClock,
+//       title: "Skip the Wait",
+//       description: "Order ahead and save precious time. No more standing in queues."
+//     },
+//     {
+//       icon: FaQrcode,
+//       title: "Smart Pickup",
+//       description: "Unique QR code system for seamless order collection."
+//     },
+//     {
+//       icon: FaMobile,
+//       title: "Easy Ordering",
+//       description: "Intuitive mobile-first experience for quick ordering."
+//     },
+//     {
+//       icon: FaUtensils,
+//       title: "Fresh & Ready",
+//       description: "Your food prepared fresh, ready when you are."
+//     }
+//   ];
+
+//   return (
+//     <Box bg="orange.50" minH="100vh">
+//       {/* Hero Section */}
+//       <Container maxW="container.xl" pt={{ base: 20, md: 32 }} pb={20}>
+//         <VStack spacing={8} align="center" textAlign="center">
+//           <MotionBox
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             transition={{ duration: 0.5 }}
+//           >
+//             <Badge 
+//               colorScheme="orange" 
+//               fontSize="md" 
+//               px={4} 
+//               py={2} 
+//               borderRadius="full"
+//               mb={4}
+//             >
+//               Coming Soon
+//             </Badge>
+//             <Heading
+//               fontSize={{ base: "4xl", md: "6xl" }}
+//               fontWeight="bold"
+//               color="orange.800"
+//               lineHeight="shorter"
+//               mb={4}
+//             >
+//               The Future of Food Pickup
+//             </Heading>
+//             <Text
+//               fontSize={{ base: "xl", md: "2xl" }}
+//               color="gray.600"
+//               maxW="3xl"
+//               mb={8}
+//             >
+//               Experience a revolutionary way to order and collect your favorite foods. 
+//               No waiting, no hassle, just smooth sailing from order to pickup.
+//             </Text>
+//             <Button
+//               size="lg"
+//               colorScheme="orange"
+//               px={8}
+//               fontSize="lg"
+//               height="60px"
+//               onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
+//               _hover={{
+//                 transform: 'translateY(-2px)',
+//                 boxShadow: 'lg',
+//               }}
+//             >
+//               Join the Waitlist
+//             </Button>
+//           </MotionBox>
+
+//           {/* Features Grid */}
+//           <SimpleGrid
+//             columns={{ base: 1, md: 2, lg: 4 }}
+//             spacing={8}
+//             w="full"
+//             pt={20}
+//           >
+//             {features.map((feature, index) => (
+//               <FeatureCard key={index} {...feature} />
+//             ))}
+//           </SimpleGrid>
+
+//           {/* Bottom CTA Section */}
+//           <Box
+//             bg="white"
+//             w="full"
+//             mt={20}
+//             p={10}
+//             borderRadius="2xl"
+//             boxShadow="xl"
+//             border="2px solid"
+//             borderColor="orange.100"
+//           >
+//             <VStack spacing={6}>
+//               <Heading color="orange.700" size="lg">
+//                 Ready to Transform Your Food Pickup Experience?
+//               </Heading>
+//               <Text color="gray.600" fontSize="lg">
+//                 Be among the first to experience the future of food ordering.
+//               </Text>
+//               <HStack spacing={4}>
+//                 <Button
+//                   colorScheme="orange"
+//                   size="lg"
+//                   onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
+//                   _hover={{
+//                     transform: 'translateY(-2px)',
+//                     boxShadow: 'lg',
+//                   }}
+//                 >
+//                   Get Early Access
+//                 </Button>
+//                 <Button
+//                   variant="outline"
+//                   colorScheme="orange"
+//                   size="lg"
+//                   onClick={() => window.open('https://www.linkedin.com/company/thefost/', '_blank')}
+//                   _hover={{
+//                     transform: 'translateY(-2px)',
+//                     boxShadow: 'lg',
+//                   }}
+//                 >
+//                   Learn More
+//                 </Button>
+//               </HStack>
+//             </VStack>
+//           </Box>
+//         </VStack>
+//       </Container>
+//     </Box>
+//   );
+// };
+
+// export default Home;
