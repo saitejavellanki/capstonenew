@@ -246,7 +246,7 @@ const LoadingScreen = ({ children }) => {
       >
         <Box
           height="full"
-          bgGradient="linear(to-r, #FC8019, #fd9642)"
+          bgGradient="linear(to-r,rgb(86, 155, 17),rgb(97, 253, 66))"
           width="0"
           animation="progressBar 2.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
           sx={{
