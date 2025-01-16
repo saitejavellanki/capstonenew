@@ -11,10 +11,35 @@ import {
   VStack,
   Heading,
   Flex,
+  Link,
 } from '@chakra-ui/react';
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa';
 
 const Footer = () => {
+  const socialLinks = [
+    {
+      label: 'twitter',
+      icon: <FaTwitter size="20px" />,
+      href: 'https://x.com/FOST_4',
+    },
+    {
+      label: 'instagram',
+      icon: <FaInstagram size="20px" />,
+      href: 'https://www.instagram.com/fost_service/',
+    },
+    {
+      label: 'youtube',
+      icon: <FaYoutube size="20px" />,
+      href: 'https://www.youtube.com/@the_fost',
+    },
+    {
+      label: 'linkedin',
+      icon: <FaLinkedin size="20px" />,
+      href: 'https://www.linkedin.com/search/results/all/?keywords=fost&origin=GLOBAL_SEARCH_HEADER&sid=i.V',
+      color: '#0A66C2'
+    },
+  ];
+
   return (
     <Box 
       as="footer" 
@@ -61,42 +86,24 @@ const Footer = () => {
               spacing={4}
               align="center"
             >
-              <IconButton
-                aria-label="facebook"
-                icon={<FaFacebook size="20px" />}
-                rounded="full"
-                bg="whiteAlpha.200"
-                _hover={{ bg: 'whiteAlpha.300', transform: 'scale(1.1)' }}
-                transition="all 0.3s"
-                size="lg"
-              />
-              <IconButton
-                aria-label="twitter"
-                icon={<FaTwitter size="20px" />}
-                rounded="full"
-                bg="whiteAlpha.200"
-                _hover={{ bg: 'whiteAlpha.300', transform: 'scale(1.1)' }}
-                transition="all 0.3s"
-                size="lg"
-              />
-              <IconButton
-                aria-label="instagram"
-                icon={<FaInstagram size="20px" />}
-                rounded="full"
-                bg="whiteAlpha.200"
-                _hover={{ bg: 'whiteAlpha.300', transform: 'scale(1.1)' }}
-                transition="all 0.3s"
-                size="lg"
-              />
-              <IconButton
-                aria-label="youtube"
-                icon={<FaYoutube size="20px" />}
-                rounded="full"
-                bg="whiteAlpha.200"
-                _hover={{ bg: 'whiteAlpha.300', transform: 'scale(1.1)' }}
-                transition="all 0.3s"
-                size="lg"
-              />
+              {socialLinks.map((social) => (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  isExternal
+                  _hover={{ textDecoration: 'none' }}
+                >
+                  <IconButton
+                    aria-label={social.label}
+                    icon={social.icon}
+                    rounded="full"
+                    bg="whiteAlpha.200"
+                    _hover={{ bg: 'whiteAlpha.300', transform: 'scale(1.1)' }}
+                    transition="all 0.3s"
+                    size="lg"
+                  />
+                </Link>
+              ))}
             </Stack>
           </Flex>
 
@@ -120,7 +127,6 @@ const Footer = () => {
               >
                 About Us
               </Button>
-              
             </VStack>
 
             <VStack align="flex-start" spacing={4}>
@@ -149,7 +155,6 @@ const Footer = () => {
               >
                 Contact Us
               </Button>
-              
             </VStack>
 
             <VStack align="flex-start" spacing={4}>
@@ -167,7 +172,6 @@ const Footer = () => {
               >
                 Workflow
               </Button>
-              
             </VStack>
 
             <VStack align="flex-start" spacing={4}>
@@ -205,9 +209,8 @@ const Footer = () => {
                 fontSize="sm" 
                 _hover={{ color: 'whiteAlpha.700', textDecoration: 'none' }}
               >
-                Cancellation Policy.
+                Cancellation Policy
               </Button>
-              
             </VStack>
           </SimpleGrid>
 

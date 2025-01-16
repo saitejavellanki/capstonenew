@@ -45,6 +45,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
+import BannerCarousel from '../../Components/banner/Banner';
 
 
 // Motion components
@@ -481,6 +482,7 @@ const Home = () => {
     </Flex>
   </MotionBox>
 )}
+<BannerCarousel/>
         {/* Hero Section */}
         <VStack
           spacing={{ base: 8, md: 12, lg: 16 }}
@@ -496,7 +498,7 @@ const Home = () => {
               color="teal.800"
               lineHeight="shorter"
             >
-              Less Waiting, More Eating!
+              Less Waiting, Healthy Eating!
             </Heading>
 
             
