@@ -758,6 +758,148 @@ const VendorItems = () => {
     </ModalBody>
   </ModalContent>
 </Modal>
+{/* Edit Item Modal */}
+<Modal 
+  isOpen={isEditModalOpen} 
+  onClose={onEditModalClose}
+  size={{ base: 'full', md: 'md' }}
+>
+  <ModalOverlay />
+  <ModalContent 
+    mx={{ base: 0, md: 'auto' }} 
+    my={{ base: 0, md: '10vh' }}
+  >
+    <ModalHeader>Edit Item</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody pb={6}>
+      <form onSubmit={handleUpdateItem}>
+        <VStack spacing={4}>
+          <FormControl isRequired>
+            <FormLabel>Item Name</FormLabel>
+            <Input
+              name="name"
+              value={itemData.name}
+              onChange={handleInputChange}
+              placeholder="Enter item name"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Diet Type</FormLabel>
+            <RadioGroup 
+              name="dietType"
+              value={itemData.dietType}
+              onChange={(value) => setItemData(prev => ({
+                ...prev,
+                dietType: value
+              }))}
+            >
+              <HStack spacing={4}>
+                <Radio value="veg" colorScheme="green">
+                  Vegetarian
+                </Radio>
+                <Radio value="non-veg" colorScheme="red">
+                  Non-Vegetarian
+                </Radio>
+              </HStack>
+            </RadioGroup>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Category</FormLabel>
+            <Select
+              name="category"
+              value={itemData.category}
+              onChange={handleInputChange}
+              placeholder="Select category"
+              size={{ base: 'md', md: 'lg' }}
+            >
+              {FOOD_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Price</FormLabel>
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={itemData.price}
+              onChange={handleInputChange}
+              placeholder="Enter price"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Description</FormLabel>
+            <Textarea
+              name="description"
+              value={itemData.description}
+              onChange={handleInputChange}
+              placeholder="Enter item description"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Item Image</FormLabel>
+            <Input 
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              onChange={handleImageChange}
+              size={{ base: 'md', md: 'lg' }}
+              sx={{
+                '::file-selector-button': {
+                  height: '40px',
+                  padding: '0 15px',
+                  mr: 4,
+                  bg: 'gray.200',
+                  borderRadius: 'md',
+                  cursor: 'pointer'
+                }
+              }}
+            />
+            {itemImagePreview && (
+              <Image 
+                src={itemImagePreview} 
+                alt="Item Preview" 
+                mt={4} 
+                maxH={{ base: '150px', md: '200px' }} 
+                objectFit="cover" 
+                width="100%"
+              />
+            )}
+            <Input
+              mt={2}
+              name="imageUrl"
+              value={itemData.imageUrl}
+              onChange={handleInputChange}
+              placeholder="Or enter image URL"
+              size={{ base: 'md', md: 'lg' }}
+            />
+          </FormControl>
+
+          <Button
+            type="submit"
+            colorScheme="blue"
+            width="full"
+            isLoading={submitting}
+            size={{ base: 'md', md: 'lg' }}
+          >
+            Update Item
+          </Button>
+        </VStack>
+      </form>
+    </ModalBody>
+  </ModalContent>
+</Modal>
       </VStack>
     </Box>
   );
