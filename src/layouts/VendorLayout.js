@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -20,7 +20,6 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerBody,
-  useToast,
   Avatar,
   Tooltip,
   Divider,
@@ -34,7 +33,6 @@ import {
   BarChart2,
   TrendingUp,
   Star,
-  Bell,
   Settings,
   LogOut,
   Menu as MenuIcon,
@@ -46,21 +44,9 @@ import {
   LineChart,
 } from 'lucide-react';
 
-const blinkAnimation = keyframes`
-  0% { background-color: transparent; }
-  50% { background-color: #FEB2B2; }
-  100% { background-color: transparent; }
-`;
-
 const shineAnimation = keyframes`
   0% { background-position: -100px; }
   100% { background-position: 200px; }
-`;
-
-const pulseAnimation = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
 `;
 
 const theme = {
@@ -87,11 +73,7 @@ const theme = {
 const VendorLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [newOrders, setNewOrders] = useState(false);
-  const [previousOrderCount, setPreviousOrderCount] = useState(0);
-  const [notifications, setNotifications] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [vendorInfo, setVendorInfo] = useState({
@@ -113,50 +95,11 @@ const VendorLayout = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [onClose]);
 
-  useEffect(() => {
-    const handleOrderUpdate = (event) => {
-      if (event.detail.orderCount > previousOrderCount) {
-        setNewOrders(true);
-        setPreviousOrderCount(event.detail.orderCount);
-        
-        addNotification('New Order', `You have received a new order #${event.detail.orderId}`);
-        
-        setTimeout(() => {
-          setNewOrders(false);
-        }, 5000);
-      }
-    };
-
-    window.addEventListener('newPendingOrder', handleOrderUpdate);
-    return () => window.removeEventListener('newPendingOrder', handleOrderUpdate);
-  }, [previousOrderCount]);
-
-  const addNotification = useCallback((title, message) => {
-    const newNotification = {
-      id: Date.now(),
-      title,
-      message,
-      timestamp: new Date(),
-      read: false,
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-    
-    toast({
-      title,
-      description: message,
-      status: 'info',
-      duration: 5000,
-      isClosable: true,
-      position: 'top-right',
-    });
-  }, [toast]);
-
   const navItems = [
     {
       label: 'Orders',
       path: '/vendor/PendingVendors',
       icon: ShoppingBag,
-      needsNotification: true,
     },
     {
       label: 'Processing',
@@ -231,10 +174,6 @@ const VendorLayout = () => {
       borderRight={isActive ? '4px' : '0px'}
       borderColor={theme.colors.text.active}
       transition="all 0.2s"
-      animation={item.needsNotification && newOrders && !isActive 
-        ? `${blinkAnimation} 1s ease-in-out infinite` 
-        : 'none'
-      }
       _hover={{
         bg: isActive ? theme.colors.bg.active : theme.colors.bg.hover,
       }}
@@ -406,68 +345,6 @@ const VendorLayout = () => {
         flexDirection="column"
         h="100vh"
       >
-        {/* Header */}
-        <Flex
-          as="header"
-          align="center"
-          justify="flex-end"
-          px={8}
-          py={4}
-          bg={theme.colors.bg.primary}
-          borderBottomWidth="1px"
-          borderColor={theme.colors.border}
-          flexShrink={0}
-        >
-          <HStack spacing={4}>
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<Bell />}
-                variant="ghost"
-                position="relative"
-              >
-                {notifications.some(n => !n.read) && (
-                  <Badge
-                    position="absolute"
-                    top={1}
-                    right={1}
-                    colorScheme="red"
-                    borderRadius="full"
-                  />
-                )}
-              </MenuButton>
-              <MenuList>
-                {notifications.length > 0 ? (
-                  notifications.map(notification => (
-                    <MenuItem key={notification.id}>
-                      <Box>
-                        <Text fontWeight="medium">{notification.title}</Text>
-                        <Text fontSize="sm" color={theme.colors.text.secondary}>
-                          {notification.message}
-                        </Text>
-                      </Box>
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem>No new notifications</MenuItem>
-                )}
-              </MenuList>
-            </Menu>
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<Settings />}
-                variant="ghost"
-              />
-              <MenuList>
-                <MenuItem>Profile Settings</MenuItem>
-                <MenuItem>Store Settings</MenuItem>
-                <MenuItem>Preferences</MenuItem>
-              </MenuList>
-            </Menu>
-          </HStack>
-        </Flex>
-
         {/* Main Content Area - Scrollable */}
         <Box flex="1" overflowY="auto" bg={theme.colors.bg.secondary} p={8}>
           <Outlet />
