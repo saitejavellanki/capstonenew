@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Box,
   Flex,
+  Stack,
   VStack,
   Heading,
   Input,
@@ -14,8 +15,10 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
-  Image,
-  Icon
+  Icon,
+  InputGroup,
+  InputLeftElement,
+  HStack,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
@@ -27,7 +30,6 @@ import {
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, firestore } from "../../Components/firebase/Firebase";
-import backgroundImage from "../../Assets/WhatsApp Image 2024-11-20 at 10.00.05 PM.jpeg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -51,11 +53,7 @@ const Login = () => {
           return;
         }
 
-        userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
       } else {
         const provider = new GoogleAuthProvider();
         userCredential = await signInWithPopup(auth, provider);
@@ -97,8 +95,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-
-      const errorMessage = 
+      const errorMessage =
         error.code === "auth/invalid-credential"
           ? "Invalid email or password. Please try again."
           : "Login failed. Please try again.";
@@ -117,64 +114,74 @@ const Login = () => {
   };
 
   return (
-    <Flex 
-      position="relative"
-      h="100vh" 
-      overflow="hidden"
-    >
-      {/* Gradient Overlay Background */}
+    <Flex minH="100vh" direction={{ base: "column", md: "row" }}>
+      {/* Left Side - Hero Section */}
       <Box
-        position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        backgroundImage="linear-gradient(135deg, rgba(58,123,213,0.8) 0%, rgba(58,96,115,0.8) 100%)"
-        backgroundSize="cover"
-        zIndex="1"
-      />
-
-      {/* Background Image with Blur */}
-      <Image 
-        src={backgroundImage}
-        position="absolute"
-        top="0"
-        left="0"
-        w="full"
-        h="full"
-        objectFit="cover"
-        filter="blur(8px)"
-        opacity="0.6"
-        zIndex="0"
-      />
-
-      <Flex 
-        position="relative"
-        zIndex="2"
-        w="full" 
-        h="full" 
-        justify="center" 
-        align="center" 
-        p={4}
+        display={{ base: "none", md: "flex" }}
+        flex="1"
+        bg="orange.500"
       >
-        <VStack 
-          bg="white" 
-          w="400px" 
-          p={8} 
-          spacing={6} 
-          borderRadius="2xl" 
-          boxShadow="2xl"
+        <VStack
+          w="full"
+          h="full"
+          justify="center"
+          p={10}
+          spacing={6}
+          color="white"
         >
-          <VStack spacing={2} textAlign="center" w="full">
-            <Heading 
-              fontSize="3xl" 
-              color="blue.600" 
-              fontWeight="bold"
-            >
-              Welcome Back
+          <Heading size="2xl" fontWeight="bold" textAlign="center">
+            Welcome to Our Marketplace
+          </Heading>
+          <Text fontSize="xl" textAlign="center" maxW="500px">
+            Join thousands of successful entrepreneurs and customers in our thriving marketplace
+          </Text>
+          
+          <Stack spacing={6} mt={4}>
+            <HStack spacing={4} justify="center">
+              <Box p={4} bg="whiteAlpha.200" borderRadius="lg">
+                <Text fontWeight="bold">100K+</Text>
+                <Text fontSize="sm">Active Users</Text>
+              </Box>
+              <Box p={4} bg="whiteAlpha.200" borderRadius="lg">
+                <Text fontWeight="bold">50K+</Text>
+                <Text fontSize="sm">Products</Text>
+              </Box>
+              <Box p={4} bg="whiteAlpha.200" borderRadius="lg">
+                <Text fontWeight="bold">95%</Text>
+                <Text fontSize="sm">Satisfaction</Text>
+              </Box>
+            </HStack>
+          </Stack>
+        </VStack>
+      </Box>
+
+      {/* Right Side - Login Form */}
+      <Flex
+        flex="1"
+        bg="white"
+        justify="center"
+        align="center"
+        p={{ base: 4, md: 6, lg: 8 }}
+      >
+        <VStack
+          w="full"
+          maxW="440px"
+          spacing={4}
+        >
+          <VStack spacing={1} align="flex-start" w="full">
+            <Heading fontSize="3xl" color="gray.800">
+              Sign In
             </Heading>
-            <Text color="gray.500">
-              Sign in to continue
+            <Text color="gray.600">
+              Don't have an account?{" "}
+              <Link
+                color="orange.500"
+                fontWeight="semibold"
+                _hover={{ color: "orange.600" }}
+                onClick={() => navigate("/register")}
+              >
+                Join Now
+              </Link>
             </Text>
           </VStack>
 
@@ -185,41 +192,53 @@ const Login = () => {
             </Alert>
           )}
 
-          <VStack w="full" spacing={4}>
+          <VStack spacing={3} w="full" mt={2}>
             <FormControl>
-              <Input 
-                placeholder="Email Address" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                leftElement={<Icon as={MdEmail} color="gray.400" />}
-                bg="gray.100"
-                border="none"
-                h="50px"
-                borderRadius="xl"
-                _placeholder={{ color: "gray.500" }}
-              />
+              <InputGroup size="lg">
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={MdEmail} color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  type="email"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  borderColor="gray.200"
+                  _hover={{ borderColor: "orange.400" }}
+                  _focus={{
+                    borderColor: "orange.500",
+                    boxShadow: "0 0 0 1px orange.500",
+                  }}
+                />
+              </InputGroup>
             </FormControl>
 
             <FormControl>
-              <Input 
-                type="password"
-                placeholder="Password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                leftElement={<Icon as={MdLock} color="gray.400" />}
-                bg="gray.100"
-                border="none"
-                h="50px"
-                borderRadius="xl"
-                _placeholder={{ color: "gray.500" }}
-              />
+              <InputGroup size="lg">
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={MdLock} color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  borderColor="gray.200"
+                  _hover={{ borderColor: "orange.400" }}
+                  _focus={{
+                    borderColor: "orange.500",
+                    boxShadow: "0 0 0 1px orange.500",
+                  }}
+                />
+              </InputGroup>
             </FormControl>
 
-            <Flex w="full" justifyContent="flex-end">
-              <Link 
-                color="blue.500" 
+            <Flex w="full" justify="flex-end">
+              <Link
+                color="orange.500"
+                fontSize="sm"
                 fontWeight="semibold"
-                _hover={{ textDecoration: "none", color: "blue.600" }}
+                _hover={{ color: "orange.600" }}
                 onClick={() => navigate("/reset-password")}
               >
                 Forgot Password?
@@ -228,42 +247,41 @@ const Login = () => {
 
             <Button
               w="full"
-              colorScheme="blue"
-              h="50px"
-              borderRadius="xl"
+              size="lg"
+              colorScheme="orange"
               isLoading={isLoading}
               onClick={() => handleSignIn("email")}
+              _hover={{ bg: "orange.600" }}
             >
-              Sign In
+              Continue
+            </Button>
+
+            <HStack w="full" my={1}>
+              <Divider />
+              <Text fontSize="sm" color="gray.500" whiteSpace="nowrap">
+                OR
+              </Text>
+              <Divider />
+            </HStack>
+
+            <Button
+              w="full"
+              size="lg"
+              variant="outline"
+              leftIcon={<Icon as={FcGoogle} boxSize={5} />}
+              borderColor="gray.200"
+              _hover={{ bg: "gray.50" }}
+              onClick={() => handleSignIn("google")}
+              isLoading={isLoading}
+            >
+              Continue with Google
             </Button>
           </VStack>
 
-          <Divider />
-
-          <Button
-            w="full"
-            variant="outline"
-            h="50px"
-            borderRadius="xl"
-            leftIcon={<Icon as={FcGoogle} boxSize={6} />}
-            borderColor="gray.300"
-            color="gray.700"
-            isLoading={isLoading}
-            onClick={() => handleSignIn("google")}
-          >
-            Sign in with Google
-          </Button>
-
-          <Text>
-            New User?{" "}
-            <Link 
-              color="blue.500" 
-              fontWeight="bold"
-              _hover={{ textDecoration: "none", color: "blue.600" }}
-              onClick={() => navigate("/register")}
-            >
-              Create an Account
-            </Link>
+          <Text fontSize="sm" color="gray.500" textAlign="center" mt={2}>
+            By joining, you agree to our{" "}
+            <Link color="orange.500">Terms of Service</Link> and{" "}
+            <Link color="orange.500">Privacy Policy</Link>
           </Text>
         </VStack>
       </Flex>

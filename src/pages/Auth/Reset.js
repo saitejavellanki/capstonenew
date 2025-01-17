@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { 
   Box, 
   Flex, 
+  Stack,
   Heading, 
   Input, 
   Button, 
@@ -77,80 +78,131 @@ const Reset = () => {
     <Flex 
       justify="center" 
       align="center" 
-      h="100vh" 
-      bg="gray.100"
+      minH="100vh" 
+      bg="gray.50"
+      py={12}
+      px={4}
     >
-      <Box 
-        w="400px" 
-        p={8} 
-        borderWidth={1} 
-        borderRadius="lg" 
-        boxShadow="lg" 
-        bg="white"
-      >
-        <Heading mb={4} fontWeight="bold" fontSize="2xl">
-          Reset Password
-        </Heading>
-        <Text mb={6} color="gray.500">
-          Enter your email to reset your password
-        </Text>
+      <Stack spacing={8} maxW="md" w="full">
+        {/* Top Card */}
+        <Box
+          position="relative"
+          bg="orange.500"
+          color="white"
+          p={8}
+          borderRadius="xl"
+          boxShadow="xl"
+          transform="translateY(24px)"
+          zIndex={1}
+        >
+          <Heading fontSize="3xl" fontWeight="extrabold" mb={2}>
+            Reset Password
+          </Heading>
+          <Text fontSize="lg" opacity={0.9}>
+            Get back to your account in no time
+          </Text>
+        </Box>
 
-        {resetError && (
-          <Alert status="error" mb={4} borderRadius="md">
-            <AlertIcon />
-            <AlertDescription>{resetError}</AlertDescription>
-          </Alert>
-        )}
+        {/* Main Card */}
+        <Box
+          bg="white"
+          p={8}
+          borderRadius="xl"
+          boxShadow="2xl"
+          position="relative"
+          zIndex={2}
+        >
+          {resetError && (
+            <Alert status="error" mb={6} borderRadius="lg">
+              <AlertIcon />
+              <AlertDescription>{resetError}</AlertDescription>
+            </Alert>
+          )}
 
-        {resetSuccess && (
-          <Alert status="success" mb={4} borderRadius="md">
-            <AlertIcon />
-            <AlertDescription>{resetSuccess}</AlertDescription>
-          </Alert>
-        )}
+          {resetSuccess && (
+            <Alert status="success" mb={6} borderRadius="lg">
+              <AlertIcon />
+              <AlertDescription>{resetSuccess}</AlertDescription>
+            </Alert>
+          )}
 
-        <form onSubmit={handleResetPassword}>
-          <FormControl mb={4}>
-            <Input
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              bg="gray.100"
-              borderRadius="md"
-              height="50px"
-              _placeholder={{ color: 'gray.500' }}
-            />
-          </FormControl>
+          <form onSubmit={handleResetPassword}>
+            <Stack spacing={6}>
+              <FormControl>
+                <Input
+                  placeholder="Enter your email address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  size="lg"
+                  bg="gray.50"
+                  border="2px solid"
+                  borderColor="gray.200"
+                  _hover={{
+                    borderColor: 'orange.300'
+                  }}
+                  _focus={{
+                    borderColor: 'orange.500',
+                    boxShadow: '0 0 0 1px var(--chakra-colors-orange-500)'
+                  }}
+                />
+              </FormControl>
 
-          <Button
-            colorScheme="blue"
-            w="full"
-            type="submit"
-            height="50px"
-            borderRadius="md"
-            isLoading={isLoading}
-            fontWeight="bold"
-            fontSize="lg"
-          >
-            Send Reset Link
-          </Button>
-        </form>
+              <Button
+                type="submit"
+                size="lg"
+                bg="orange.500"
+                color="white"
+                _hover={{
+                  bg: 'orange.600'
+                }}
+                _active={{
+                  bg: 'orange.700'
+                }}
+                isLoading={isLoading}
+                loadingText="Sending..."
+                fontSize="md"
+                fontWeight="bold"
+                boxShadow="md"
+              >
+                Send Reset Link
+              </Button>
+            </Stack>
+          </form>
 
-        <Text mt={4} textAlign="center">
-          Remember your password? 
-          <Link 
-            onClick={handleNavigateToLogin} 
-            color="blue.500" 
-            fontWeight="bold" 
-            ml={2}
-            cursor="pointer"
-          >
-            Login
-          </Link>
-        </Text>
-      </Box>
+          <Flex justify="center" mt={8}>
+            <Text color="gray.600">
+              Remember your password?{' '}
+              <Link 
+                onClick={handleNavigateToLogin} 
+                color="orange.500" 
+                fontWeight="semibold"
+                _hover={{
+                  color: 'orange.600',
+                  textDecoration: 'underline'
+                }}
+              >
+                Back to Login
+              </Link>
+            </Text>
+          </Flex>
+        </Box>
+
+        {/* Bottom Card */}
+        <Box
+          bg="gray.100"
+          p={6}
+          borderRadius="xl"
+          boxShadow="lg"
+          transform="translateY(-24px)"
+          textAlign="center"
+        >
+          <Text color="gray.600" fontSize="sm">
+            Need help? Contact our support team
+          </Text>
+        </Box>
+      </Stack>
     </Flex>
   );
 };
