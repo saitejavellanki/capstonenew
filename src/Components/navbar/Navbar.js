@@ -209,7 +209,7 @@ const Navbar = () => {
           {user?.role === 'vendor' && (
             <>
               <MenuItem onClick={() => {
-                navigate('/vendor/dashboard');
+                navigate('/vendor/PendingVendors');
                 onClose();
               }}>
                 Vendor Dashboard
