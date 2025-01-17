@@ -182,7 +182,7 @@ const OrderScanningPage = () => {
                   <Td>{order.customer?.name || 'N/A'}</Td>
                   <Td>{order.items?.[0]?.name || 'N/A'}</Td>
                   <Td isNumeric>{order.items?.[0]?.quantity || 1}</Td>
-                  <Td isNumeric>${order.total?.toFixed(2) || '0.00'}</Td>
+                  <Td isNumeric>Rs.{order.total?.toFixed(2) || '0.00'}</Td>
                   <Td>{formatDate(order.createdAt)}</Td>
                   <Td>{order.status === 'picked_up' ? formatDate(order.pickedUpAt) : '-'}</Td>
                   <Td>{getStatusBadge(order.status)}</Td>

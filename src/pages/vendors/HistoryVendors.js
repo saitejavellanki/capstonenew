@@ -213,13 +213,13 @@ const OrderHistory = () => {
                 <tr>
                   <td>${item.name}</td>
                   <td>${item.quantity}</td>
-                  <td>$${item.price}</td>
+                  <td>Rs.${item.price}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
           <div class="total">
-            <h3>Total: $${order.totalAmount}</h3>
+            <h3>Total: Rs.${order.totalAmount}</h3>
           </div>
         </body>
       </html>
@@ -261,11 +261,11 @@ const OrderHistory = () => {
           </Stat>
           <Stat>
             <StatLabel>Total Revenue</StatLabel>
-            <StatNumber>${statistics.totalRevenue.toFixed(2)}</StatNumber>
+            <StatNumber>Rs.{statistics.totalRevenue.toFixed(2)}</StatNumber>
           </Stat>
           <Stat>
             <StatLabel>Average Order Value</StatLabel>
-            <StatNumber>${statistics.averageOrderValue.toFixed(2)}</StatNumber>
+            <StatNumber>Rs.{statistics.averageOrderValue.toFixed(2)}</StatNumber>
           </Stat>
           <Stat>
             <StatLabel>Cancelled Orders</StatLabel>
@@ -340,7 +340,7 @@ const OrderHistory = () => {
                         {(order.items || []).map(item => `${item.name} x${item.quantity}`).join(', ')}
                       </Text>
                     </Td>
-                    <Td>${order.totalAmount}</Td>
+                    <Td>Rs.{order.totalAmount}</Td>
                     <Td>
                       <Badge colorScheme={statusColors[order.status]}>
                         {order.status}
@@ -416,8 +416,8 @@ const OrderHistory = () => {
                         <Tr key={index}>
                           <Td>{item.name}</Td>
                           <Td>{item.quantity}</Td>
-                          <Td>${item.price}</Td>
-                          <Td>${(item.price * item.quantity).toFixed(2)}</Td>
+                          <Td>Rs.{item.price}</Td>
+                          <Td>Rs.{(item.price * item.quantity).toFixed(2)}</Td>
                         </Tr>
                       ))}
                     </Tbody>
@@ -428,11 +428,11 @@ const OrderHistory = () => {
                   <Stack spacing={2}>
                     <Flex justify="space-between">
                       <Text>Subtotal:</Text>
-                      <Text>${selectedOrder.subtotal?.toFixed(2) || '0.00'}</Text>
+                      <Text>Rs.{selectedOrder.subtotal?.toFixed(2) || '0.00'}</Text>
                     </Flex>
                     <Flex justify="space-between">
                       <Text>Shipping:</Text>
-                      <Text>${selectedOrder.shippingCost?.toFixed(2) || '0.00'}</Text>
+                      <Text>Rs.{selectedOrder.shippingCost?.toFixed(2) || '0.00'}</Text>
                     </Flex>
                     {selectedOrder.discount && (
                       <Flex justify="space-between">
@@ -442,7 +442,7 @@ const OrderHistory = () => {
                     )}
                     <Flex justify="space-between" fontWeight="bold">
                       <Text>Total:</Text>
-                      <Text>${selectedOrder.totalAmount}</Text>
+                      <Text>Rs.{selectedOrder.totalAmount}</Text>
                     </Flex>
                   </Stack>
                 </Box>

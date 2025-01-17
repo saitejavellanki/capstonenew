@@ -127,12 +127,12 @@ const VendorLayout = () => {
       icon: LineChart,
       isPremium: true,
     },
-    {
-      label: 'Customer Management',
-      path: '/vendor/kpivendor',
-      icon: Users,
-      isPremium: true,
-    },
+    // {
+    //   label: 'Inventory Management',
+    //   path: '/vendor/InventoryManagement',
+    //   icon: Users,
+    //   isPremium: true,
+    // },
     {
       label: 'History',
       path: '/vendor/HistoryVendor',

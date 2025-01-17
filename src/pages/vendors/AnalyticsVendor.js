@@ -598,8 +598,8 @@ const AnalyticsDashboard = () => {
         />
         <StatCard
           title="Total Revenue"
-          value={`$${analytics.totalRevenue.toFixed(2)}`}
-          icon={FiDollarSign}
+          value={`Rs.${analytics.totalRevenue.toFixed(2)}`}
+          
         />
         <StatCard
           title="Pending"

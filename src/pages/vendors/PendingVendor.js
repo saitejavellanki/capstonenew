@@ -59,7 +59,7 @@ const PendingOrders = () => {
         
         toast({
           title: 'New Orders!',
-          description: `You have ${ordersData.length - previousOrderCount} new order(s)`,
+          description: `You have Rs.{ordersData.length - previousOrderCount} new order(s)`,
           status: 'info',
           duration: 5000,
           isClosable: true,
@@ -239,7 +239,7 @@ const PendingOrders = () => {
                       </Td>
                       <Td>
                         <Text fontWeight="medium">
-                          ${order.total?.toFixed(2) || '0.00'}
+                          Rs.{order.total?.toFixed(2) || '0.00'}
                         </Text>
                       </Td>
                       <Td>
@@ -271,7 +271,7 @@ const PendingOrders = () => {
                             icon={<CloseIcon />}
                             size="sm"
                             isLoading={isUpdating}
-                            onClick={() => handleStatusUpdate(order.id, 'rejected')}
+                            onClick={() => handleStatusUpdate(order.id, 'cancelled')}
                           />
                         </HStack>
                       </Td>
