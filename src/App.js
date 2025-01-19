@@ -40,6 +40,8 @@ import AnalyticsDashboard from './pages/vendors/AnalyticsVendor';
 import AdvancedAnalytics from './pages/vendors/AdvancedAnalytic';
 import OrderHistory from './pages/vendors/HistoryVendors';
 import KPIDashboard from './pages/vendors/KPIVendors';
+import InventoryManagement from './pages/vendors/InventoryManagement';
+import AccountDeletionPage from './pages/utils/AccountDeletion';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -101,6 +103,8 @@ function App() {
             <Route path="/payment-success/:shopId" element={<PaymentSuccess />} />
             <Route path="/counter" element={<VendorCounterOrder />} />
             <Route path="/addcoupon" element={<AddCouponForm />} />
+            <Route path="/deleteAccount" element={<AccountDeletionPage />} />
+
 
             {/* Protected User Routes */}
             <Route path="/main" element={<ProtectedRoute><Main /></ProtectedRoute>} />
@@ -130,7 +134,7 @@ function App() {
               <Route path="AnalyticVendor" element={<AnalyticsDashboard/>} />
               <Route path="AdvancedAnalytics" element={<AdvancedAnalytics/>} />
               <Route path="HistoryVendor" element={<OrderHistory/>} />
-              <Route path="KpiVendor" element={<KPIDashboard/>} />
+              <Route path="InventoryManagement" element={<InventoryManagement/>} />
             </Route>
 
             {/* Catch-all redirect */}
