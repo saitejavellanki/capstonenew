@@ -43,6 +43,7 @@ import {
 import { getAuth } from 'firebase/auth';
 import BannerCarousel from '../../Components/banner/Banner';
 import Recommendations from '../../Components/recommendations/Recommendations';
+import OrderItemFeedback from './OrderItemFeedback';
 
 const OrderWaitingPage = () => {
   const [orderStatus, setOrderStatus] = useState('pending');
@@ -305,6 +306,10 @@ const OrderWaitingPage = () => {
           </Text>
         </Box>
 
+        {orderStatus === 'pending' && (
+  <OrderItemFeedback orderDetails={orderDetails} />
+)}
+
         {renderBillDetails()}
 
         {/* {isReadyForPickup && (
@@ -349,6 +354,7 @@ const OrderWaitingPage = () => {
             </ModalBody>
           </ModalContent>
         </Modal>
+        
         <BannerCarousel/>
         <Recommendations/>
       </VStack>
