@@ -284,18 +284,18 @@ const Home = () => {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
         console.log('User from localStorage:', user);
-    
+        
         if (!user) {
           console.log('No user found in localStorage');
           setLoading(false);
           return;
         }
-    
+        
         const ordersRef = collection(firestore, 'orders');
         const activeOrdersQuery = query(
-          ordersRef, 
-          where('userId', '==', user.uid)
-          
+          ordersRef,
+          where('userId', '==', user.uid),
+          where('status', '!=', 'picked_up')  // Add this condition to exclude picked up orders
         );
         
         const querySnapshot = await getDocs(activeOrdersQuery);
@@ -307,7 +307,7 @@ const Home = () => {
             data: doc.data()
           });
         });
-    
+        
         const unsubscribe = onSnapshot(activeOrdersQuery, (snapshot) => {
           console.log('Snapshot size:', snapshot.size);
           
@@ -328,16 +328,16 @@ const Home = () => {
           setActiveOrders(orders);
           setLoading(false);
         });
-    
+        
         return () => unsubscribe();
       } catch (error) {
         console.error('Error fetching active orders:', error);
         setLoading(false);
       }
     };
-
+    
     fetchActiveOrders();
-  }, [firestore]);
+}, [firestore]);
 
   if (loading) {
     return (
