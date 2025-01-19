@@ -15,8 +15,8 @@ import {
   AlertIcon,
   AlertDescription
 } from '@chakra-ui/react';
-import { auth, firestore } from './firebase';
-import { doc, setDoc, deleteDoc } from '../../Components/firebase/Firebase';
+import { auth, firestore } from '../../Components/firebase/Firebase';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { deleteUser } from 'firebase/auth';
 
 const AccountDeletionPage = () => {
