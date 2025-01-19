@@ -24,7 +24,8 @@ import {
   Tr,
   Th,
   Td,
-  TableContainer
+  TableContainer,
+  Image
 } from '@chakra-ui/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -44,6 +45,7 @@ import { getAuth } from 'firebase/auth';
 import BannerCarousel from '../../Components/banner/Banner';
 import Recommendations from '../../Components/recommendations/Recommendations';
 import OrderItemFeedback from './OrderItemFeedback';
+import sai from "../../Assets/Fos_t-removebg-preview.png"
 
 const OrderWaitingPage = () => {
   const [orderStatus, setOrderStatus] = useState('pending');
@@ -97,9 +99,20 @@ const OrderWaitingPage = () => {
               
               // Only update if the current user is the order owner
               if (updatedOrderData.userId === auth.currentUser.uid) {
-                setOrderStatus(updatedOrderData.status || 'pending');
-                setIsReadyForPickup(updatedOrderData.status === 'completed');
-                setIsCancelled(updatedOrderData.status === 'cancelled');
+                const newStatus = updatedOrderData.status || 'pending';
+                
+                // Check if status is changing to completed
+                if (newStatus === 'completed' && orderStatus !== 'completed') {
+                  // Vibrate for 10 seconds if vibration is supported
+                  if ('vibrate' in navigator) {
+                    // Vibrate for 10 seconds (10000 milliseconds)
+                    navigator.vibrate(10000);
+                  }
+                }
+                
+                setOrderStatus(newStatus);
+                setIsReadyForPickup(newStatus === 'completed');
+                setIsCancelled(newStatus === 'cancelled');
                 setOrderDetails(updatedOrderData);
               }
             }
@@ -116,7 +129,9 @@ const OrderWaitingPage = () => {
     };
 
     checkOrderAuthorization();
-  }, [orderid, firestore, navigate, auth]);
+  }, [orderid, firestore, navigate, auth, orderStatus]);
+
+  // Rest of the component code remains the same...
 
   const handlePickup = () => {
     navigate('/order-confirmation', { state: { orderId: orderid } });
@@ -184,22 +199,32 @@ const OrderWaitingPage = () => {
 
   const renderBillDetails = () => {
     if (!orderDetails || !orderDetails.items) return null;
-
+  
     const subtotal = orderDetails.items.reduce((total, item) => total + (item.price * item.quantity), 0);
     const tax = orderDetails.tax || 0;
-    const total = subtotal + tax;
-
+    const transactionFee = 0;
+    const total = subtotal + tax + transactionFee;
+  
     return (
-      <Box 
-        bg="white" 
-        p={6} 
-        borderRadius="lg" 
-        boxShadow="md" 
+      <Box
+        bg="white"
+        p={6}
+        borderRadius="lg"
+        boxShadow="md"
         mt={4}
       >
-        <Heading size="md" mb={4} textAlign="center">
-          Order Details
-        </Heading>
+        <Flex direction="column" align="center" mb={6}>
+          <Image
+            src={sai}
+            alt="Fost Logo"
+            h="40px"
+            mb={2}
+          />
+          <Heading size="md" mb={2}>Order Details</Heading>
+          <Text color="gray.600" fontSize="sm">FostByte Pvt. Ltd.</Text>
+          <Text color="gray.500" fontSize="xs">GST: 29XXXXXX1234X1XX</Text>
+        </Flex>
+  
         <TableContainer>
           <Table variant="simple">
             <Thead>
@@ -213,7 +238,12 @@ const OrderWaitingPage = () => {
             <Tbody>
               {orderDetails.items.map((item, index) => (
                 <Tr key={index}>
-                  <Td>{item.name}</Td>
+                  <Td>
+                    <Text fontWeight="medium">{item.name}</Text>
+                    {item.description && (
+                      <Text fontSize="sm" color="gray.600">{item.description}</Text>
+                    )}
+                  </Td>
                   <Td isNumeric>{item.quantity}</Td>
                   <Td isNumeric>₹{item.price.toFixed(2)}</Td>
                   <Td isNumeric>₹{(item.price * item.quantity).toFixed(2)}</Td>
@@ -222,20 +252,37 @@ const OrderWaitingPage = () => {
             </Tbody>
           </Table>
         </TableContainer>
-        
+  
         <Box mt={4} borderTop="1px solid" borderColor="gray.200" pt={4}>
           <Flex justify="space-between" mb={2}>
             <Text>Subtotal</Text>
             <Text>₹{subtotal.toFixed(2)}</Text>
           </Flex>
           <Flex justify="space-between" mb={2}>
-            <Text>Tax</Text>
+            <Text>Tax (18% GST)</Text>
             <Text>₹{tax.toFixed(2)}</Text>
           </Flex>
-          <Flex justify="space-between" fontWeight="bold">
+          <Flex justify="space-between" mb={2}>
+            <Text>Transaction Fee</Text>
+            <Text>₹{transactionFee.toFixed(2)}</Text>
+          </Flex>
+          <Flex justify="space-between" fontWeight="bold" mt={3} pt={3} borderTop="1px solid" borderColor="gray.200">
             <Text>Total</Text>
             <Text>₹{total.toFixed(2)}</Text>
           </Flex>
+        </Box>
+  
+        <Box mt={6} pt={4} borderTop="1px solid" borderColor="gray.200">
+          <Text fontSize="sm" color="gray.600" textAlign="center">
+            Thank you for choosing Fost!
+          </Text>
+          <Text fontSize="xs" color="gray.500" textAlign="center" mt={1}>
+            FostByte Pvt. Ltd.
+            <br />
+            Gachibowli, Hyderabad
+            <br />
+            Telangana - 500050
+          </Text>
         </Box>
       </Box>
     );
@@ -306,22 +353,21 @@ const OrderWaitingPage = () => {
           </Text>
         </Box>
 
+        <Button 
+          variant="outline" 
+          colorScheme="blue" 
+          onClick={handleOpenQRModal}
+          width="full"
+          isDisabled={!isReadyForPickup}
+        >
+          Show Order QR Code
+        </Button>
+
         {orderStatus === 'pending' && (
-  <OrderItemFeedback orderDetails={orderDetails} />
-)}
+          <OrderItemFeedback orderDetails={orderDetails} />
+        )}
 
         {renderBillDetails()}
-
-        {/* {isReadyForPickup && (
-          // <Button 
-          //   colorScheme="green" 
-          //   size="lg" 
-          //   onClick={handlePickup}
-          //   width="full"
-          // >
-          //   Proceed to Pickup
-          // </Button>
-        )} */}
 
         {isCancelled && (
           <Button 
@@ -334,15 +380,7 @@ const OrderWaitingPage = () => {
           </Button>
         )}
 
-        <Button 
-          variant="outline" 
-          colorScheme="blue" 
-          onClick={handleOpenQRModal}
-          width="full"
-          isDisabled={!isReadyForPickup}
-        >
-          Show Order QR Code
-        </Button>
+        
 
         <Modal isOpen={isQRModalOpen} onClose={handleCloseQRModal}>
           <ModalOverlay />
