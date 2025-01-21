@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import burger from "../../Assets/Untitled design (2).png"
-import fost from "../../Assets/Fos t.png"
+import fost from "../../Assets/Fos t.jpg"
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: scale(1.1); }
