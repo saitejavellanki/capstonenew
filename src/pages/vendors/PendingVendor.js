@@ -6,7 +6,6 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Button,
   Table,
   Thead,
   Tbody,
@@ -21,14 +20,19 @@ import {
   Text,
   Badge
 } from '@chakra-ui/react';
-import { SearchIcon, AddIcon, ExternalLinkIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
+import { SearchIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import OrderDetails from '../../Components/order/OrderDetails';
+import CancelOrderDialog from '../utils/CancelOrderDialog';
 
 const PendingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [previousOrderCount, setPreviousOrderCount] = useState(0);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   
   const toast = useToast();
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -54,12 +58,12 @@ const PendingOrders = () => {
       setOrders(ordersData);
 
       if (ordersData.length > previousOrderCount) {
-        const audio = new Audio('/notification.mp3');
+        const audio = new Audio('../../Assets/level-up-191997.mp3');
         audio.play().catch(e => console.log('Audio play failed:', e));
         
         toast({
           title: 'New Orders!',
-          description: `You have Rs.{ordersData.length - previousOrderCount} new order(s)`,
+          description: `You have ${ordersData.length - previousOrderCount} new order(s)`,
           status: 'info',
           duration: 5000,
           isClosable: true,
@@ -78,6 +82,11 @@ const PendingOrders = () => {
         isClosable: true,
       });
     }
+  };
+
+  const handleRowClick = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
   };
 
   useEffect(() => {
@@ -128,6 +137,17 @@ const PendingOrders = () => {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleAcceptClick = async (e, order) => {
+    e.stopPropagation();
+    await handleStatusUpdate(order.id, 'processing');
+  };
+
+  const handleCancelClick = (e, order) => {
+    e.stopPropagation();
+    setSelectedOrder(order);
+    setIsCancelDialogOpen(true);
   };
 
   const calculateTotalItems = (items) => {
@@ -190,7 +210,6 @@ const PendingOrders = () => {
                   borderRadius="md"
                 />
               </InputGroup>
-              
             </HStack>
           </Flex>
 
@@ -217,7 +236,11 @@ const PendingOrders = () => {
                   </Tr>
                 ) : (
                   filteredOrders.map((order) => (
-                    <Tr key={order.id} _hover={{ bg: 'gray.50' }}>
+                    <Tr 
+                      key={order.id} 
+                      _hover={{ bg: 'gray.50', cursor: 'pointer' }} 
+                      onClick={() => handleRowClick(order)}
+                    >
                       <Td>
                         <Text fontWeight="medium">#{order.id.slice(-6)}</Text>
                       </Td>
@@ -255,7 +278,7 @@ const PendingOrders = () => {
                           Pending
                         </Badge>
                       </Td>
-                      <Td>
+                      <Td onClick={e => e.stopPropagation()}>
                         <HStack spacing={2}>
                           <IconButton
                             colorScheme="green"
@@ -263,7 +286,7 @@ const PendingOrders = () => {
                             icon={<CheckIcon />}
                             size="sm"
                             isLoading={isUpdating}
-                            onClick={() => handleStatusUpdate(order.id, 'processing')}
+                            onClick={(e) => handleAcceptClick(e, order)}
                           />
                           <IconButton
                             colorScheme="red"
@@ -271,7 +294,7 @@ const PendingOrders = () => {
                             icon={<CloseIcon />}
                             size="sm"
                             isLoading={isUpdating}
-                            onClick={() => handleStatusUpdate(order.id, 'cancelled')}
+                            onClick={(e) => handleCancelClick(e, order)}
                           />
                         </HStack>
                       </Td>
@@ -283,6 +306,28 @@ const PendingOrders = () => {
           </Box>
         </Box>
       </Box>
+      <OrderDetails
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        order={selectedOrder}
+        onStatusUpdate={handleStatusUpdate}
+        isUpdating={isUpdating}
+      />
+      <CancelOrderDialog
+        isOpen={isCancelDialogOpen}
+        onClose={() => {
+          setIsCancelDialogOpen(false);
+          setSelectedOrder(null);
+        }}
+        orderId={selectedOrder?.id}
+        orderData={selectedOrder}
+        onOrderCancelled={(orderId) => {
+          setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+        }}
+      />
     </Container>
   );
 };
