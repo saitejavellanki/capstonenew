@@ -306,7 +306,7 @@ const Navbar = () => {
               <Image
                 src={sai} // Replace with your logo path
                 alt="Logo"
-                height="80px" // Adjust size as needed
+                height="60px" // Adjust size as needed
                 width="auto"
                 objectFit="contain"
               />
