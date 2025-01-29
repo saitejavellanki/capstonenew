@@ -43,7 +43,7 @@ import KPIDashboard from './pages/vendors/KPIVendors';
 import InventoryManagement from './pages/vendors/InventoryManagement';
 import AccountDeletionPage from './pages/utils/AccountDeletion';
 
-import WelcomeScreen from './pages/utils/WelcomeScreen';
+
 import GroceryPage from './pages/groceriesPage/GroceriesPage';
 import GroceryDashboard from './pages/groceriesPage/DashBoardGroceries';
 import OrderProcessPage from './pages/groceriesPage/orderProcessingPage';
