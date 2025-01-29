@@ -199,13 +199,27 @@ const Navbar = () => {
             Profile
           </MenuItem>
           {user?.role === 'admin' && (
-            <MenuItem onClick={() => {
-              navigate('/admin/shops');
-              onClose();
-            }}>
-              Admin Dashboard
-            </MenuItem>
-          )}
+  <>
+    <MenuItem onClick={() => {
+      navigate('/admin/shops');
+      onClose();
+    }}>
+      Admin Dashboard
+    </MenuItem>
+    <MenuItem onClick={() => {
+      navigate('/admin/groceriesbyfostdash');
+      onClose();
+    }}>
+      Item Management
+    </MenuItem>
+    <MenuItem onClick={() => {
+      navigate('/admin/groceriesbyfostdashdash');
+      onClose();
+    }}>
+      Dashboard
+    </MenuItem>
+  </>
+)}
           {user?.role === 'vendor' && (
             <>
               <MenuItem onClick={() => {
@@ -342,13 +356,27 @@ const Navbar = () => {
                             Profile
                           </Button>
                           {user.role === 'admin' && (
-                            <Button onClick={() => {
-                              navigate('/admin/shops');
-                              onClose();
-                            }} w="full">
-                              Admin Dashboard
-                            </Button>
-                          )}
+  <>
+    <Button onClick={() => {
+      navigate('/admin/shops');
+      onClose();
+    }} w="full">
+      Admin Dashboard
+    </Button>
+    <Button onClick={() => {
+      navigate('/admin/groceriesbyfostdash');
+      onClose();
+    }} w="full">
+      Item Management
+    </Button>
+    <Button onClick={() => {
+      navigate('/admin/groceriesbyfostdashdash');
+      onClose();
+    }} w="full">
+      Dashboard
+    </Button>
+  </>
+)}
                           {user.role === 'vendor' && (
                             <>
                               <Button onClick={() => {

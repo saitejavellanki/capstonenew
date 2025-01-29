@@ -111,8 +111,7 @@ function App() {
             <Route path="/addcoupon" element={<AddCouponForm />} />
             <Route path="/deleteAccount" element={<AccountDeletionPage />} />
             <Route path="/Groceriesbyfost" element={<GroceryPage />} />
-            <Route path="/Groceriesbyfostdash" element={<GroceryDashboard />} />
-            <Route path="/Groceriesbyfostdashdash" element={<OrderProcessPage />} />
+            
 
             {/* Protected User Routes */}
             <Route path="/main" element={<ProtectedRoute><Main /></ProtectedRoute>} />
@@ -126,11 +125,22 @@ function App() {
                 <AdminShops />
               </ProtectedRoute>
             } />
+            <Route path="/admin/Groceriesbyfostdash" element={
+              <ProtectedRoute requiredRole="admin">
+                <GroceryDashboard />
+              </ProtectedRoute>} />
+            
+            <Route path="/admin/Groceriesbyfostdashdash" element={
+              <ProtectedRoute requiredRole="admin">
+                <OrderProcessPage />
+              </ProtectedRoute>} />
 
             {/* Vendor Routes */}
             <Route path="/vendor" element={
               <ProtectedRoute requiredRole="vendor">
-                <VendorLayout />
+                <VendorWelcomeCheck>
+                  <VendorLayout />
+                </VendorWelcomeCheck>
               </ProtectedRoute>
             }>
               <Route path="dashboard" element={<VendorDashboard />} />
