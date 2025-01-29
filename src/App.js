@@ -43,6 +43,12 @@ import KPIDashboard from './pages/vendors/KPIVendors';
 import InventoryManagement from './pages/vendors/InventoryManagement';
 import AccountDeletionPage from './pages/utils/AccountDeletion';
 
+import WelcomeScreen from './pages/utils/WelcomeScreen';
+import GroceryPage from './pages/groceriesPage/GroceriesPage';
+import GroceryDashboard from './pages/groceriesPage/DashBoardGroceries';
+import OrderProcessPage from './pages/groceriesPage/orderProcessingPage';
+ // Add this import
+
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -104,7 +110,9 @@ function App() {
             <Route path="/counter" element={<VendorCounterOrder />} />
             <Route path="/addcoupon" element={<AddCouponForm />} />
             <Route path="/deleteAccount" element={<AccountDeletionPage />} />
-
+            <Route path="/Groceriesbyfost" element={<GroceryPage />} />
+            <Route path="/Groceriesbyfostdash" element={<GroceryDashboard />} />
+            <Route path="/Groceriesbyfostdashdash" element={<OrderProcessPage />} />
 
             {/* Protected User Routes */}
             <Route path="/main" element={<ProtectedRoute><Main /></ProtectedRoute>} />

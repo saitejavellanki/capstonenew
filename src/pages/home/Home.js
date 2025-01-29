@@ -46,6 +46,7 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
 import BannerCarousel from '../../Components/banner/Banner';
+import FoodCategories from '../../Components/FoodCategories';
 
 
 // Motion components
@@ -53,10 +54,10 @@ const MotionBox = chakra(motion.div);
 const MotionFlex = chakra(motion.div);
 
 // Constants
-const FOOD_CATEGORIES = [
-  { icon: FaUtensils, title: 'Food Courts', description: 'Explore our delicious menu' },
-  // { icon: FaGift, title: 'Special Offers', description: 'Check out today\'s deals' }
-];
+// const FOOD_CATEGORIES = [
+//   { icon: FaUtensils, title: 'Food Courts', description: 'Explore our delicious menu' },
+//   // { icon: FaGift, title: 'Special Offers', description: 'Check out today\'s deals' }
+// ];
 
 const CAROUSEL_SETTINGS = {
   dots: true,
@@ -72,50 +73,51 @@ const CAROUSEL_SETTINGS = {
 };
 
 // Enhanced Food Category Card
-const FoodCategory = ({ icon, title, description, onClick }) => (
-  <MotionFlex
-    direction="column"
-    align="center"
-    justify="center"
-    p={{ base: 4, md: 6 }}
-    borderRadius="2xl"
-    bg="white"
-    boxShadow="lg"
-    cursor="pointer"
-    onClick={onClick}
-    whileHover={{ scale: 1.03 }}
-    whileTap={{ scale: 0.98 }}
-    transition="all 0.3s ease"
-    _hover={{
-      boxShadow: '2xl',
-      bg: 'green.50'
-    }}
-    h="full"
-  >
-    <Icon 
-      as={icon} 
-      boxSize={{ base: 8, md: 12 }} 
-      color="green.500"
-      mb={3}
-    />
-    <Text 
-      fontWeight="bold" 
-      fontSize={{ base: 'md', md: 'xl' }}
-      color="gray.800"
-      textAlign="center"
-      mb={2}
-    >
-      {title}
-    </Text>
-    <Text
-      fontSize={{ base: 'sm', md: 'md' }}
-      color="gray.600"
-      textAlign="center"
-    >
-      {description}
-    </Text>
-  </MotionFlex>
-);
+// const FoodCategory = ({ icon, title, description, onClick }) => (
+//   <MotionFlex
+//     direction="column"
+//     align="center"
+//     justify="center"
+//     p={{ base: 4, md: 6 }}
+//     borderRadius="2xl"
+//     bg="white"
+//     boxShadow="lg"
+//     cursor="pointer"
+//     onClick={onClick}
+//     whileHover={{ scale: 1.03 }}
+//     whileTap={{ scale: 0.98 }}
+//     transition="all 0.3s ease"
+//     _hover={{
+//       boxShadow: '2xl',
+//       bg: 'green.50'
+//     }}
+//     h="full"
+//   >
+//     <Icon 
+//       as={icon} 
+//       boxSize={{ base: 8, md: 12 }} 
+//       color="green.500"
+//       mb={3}
+//     />
+//     <Text 
+//       fontWeight="bold" 
+//       fontSize={{ base: 'md', md: 'xl' }}
+//       color="gray.800"
+//       textAlign="center"
+//       mb={2}
+//     >
+//       {title}
+//     </Text>
+//     <Text
+//       fontSize={{ base: 'sm', md: 'md' }}
+//       color="gray.600"
+//       textAlign="center"
+//     >
+//       {description}
+//     </Text>
+//   </MotionFlex>
+// );
+<FoodCategories/>
 
 const PopularShopCard = ({ shop, onClick }) => (
   <MotionBox
@@ -501,7 +503,9 @@ const Home = () => {
               Less Waiting, Healthy Eating!
             </Heading>
 
-            
+            <Box width="100%">
+    <FoodCategories />
+  </Box> 
 
             
           </VStack>
@@ -513,7 +517,7 @@ const Home = () => {
         arrowDirection="right"
       /> */}
 
-<SimpleGrid
+{/* <SimpleGrid
       columns={{ base: 1, sm: 2, lg: 4 }}
       spacing={6}
       w="full"
@@ -567,7 +571,7 @@ const Home = () => {
           </VStack>
         </Flex>
       ))}
-    </SimpleGrid>
+    </SimpleGrid> */}
 
           
         </VStack>

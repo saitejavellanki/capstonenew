@@ -52,23 +52,30 @@ const Cart = () => {
 
   useEffect(() => {
     const loadCart = () => {
-      // Initialize with empty array if cart is null/undefined
       const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
       setCartItems(savedCart);
       
-      // Only perform reduce if savedCart has items
       if (savedCart.length > 0) {
         const grouped = savedCart.reduce((acc, item) => {
-          const shopId = item.shopId;
-          if (!acc[shopId]) {
-            acc[shopId] = {
+          if (!acc[item.shopId]) {
+            acc[item.shopId] = {
               items: [],
               shopName: item.shopName,
+              shopId: item.shopId,
+              vendorId: item.vendorId, // Include vendorId
               total: 0
             };
           }
-          acc[shopId].items.push(item);
-          acc[shopId].total += item.price * item.quantity;
+          acc[item.shopId].items.push({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            imageUrl: item.imageUrl,
+            category: item.category,
+            dietType: item.dietType // Include additional item fields
+          });
+          acc[item.shopId].total += item.price * item.quantity;
           return acc;
         }, {});
         setGroupedItems(grouped);
@@ -76,7 +83,6 @@ const Cart = () => {
         setGroupedItems({});
       }
     };
-  
     loadCart();
   }, []);
 
@@ -160,65 +166,69 @@ const Cart = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const txnid = `TXN_${Date.now()}`;
     
-    // First, create the order in Firestore to get the order ID
+    // Create transaction data with conditional vendorId
     const transactionData = {
-      shopId: shopData.id,
+      shopId: shopData.shopId,
+      // Only include vendorId if it exists
+      ...(shopData.vendorId && { vendorId: shopData.vendorId }),
       userId: user.uid,
       shopName: shopData.shopName,
-      items: shopData.items,
+      items: shopData.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        category: item.category,
+        dietType: item.dietType,
+        imageUrl: item.imageUrl
+      })),
       total: shopData.total,
       status: 'pending',
       paymentStatus: 'pending',
       customerEmail: user.email,
       createdAt: new Date(),
       txnid: txnid,
-      clearCart: true 
+      clearCart: true,
+      // Add a type field to distinguish between grocery and other orders
+      orderType: shopData.shopId === 'grocery-store' ? 'grocery' : 'restaurant'
     };
-  
-    try {
-      // Create the order first to get the order ID
-      const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
-      const transactionId = transactionRef.id;
 
+    try {
+      const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
       
-  
       const paymentParams = {
-        key: PAYU_MERCHANT_KEY,
+        key: 'gSR07M',
         txnid: txnid,
         amount: shopData.total.toFixed(2),
-        productinfo: `Order for ${shopData.shopName}`,
+        productinfo: `Order from ${shopData.shopName}`,
         firstname: user.displayName || 'Customer',
         email: user.email,
         phone: user.phoneNumber || '',
-        surl: `https://fostservernew.onrender.com/payment-success?transactionId=${txnid}`, // Use order ID here
+        surl: `https://fostservernew.onrender.com/payment-success?transactionId=${txnid}`,
         furl: 'https://main.d15io2iwu35boj.amplifyapp.com/',
       };
-  
-      // Generate hash
+      
       paymentParams.hash = generatePayUHash(paymentParams);
-  
-      // Redirect to PayU payment page
+      
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = 'https://secure.payu.in/_payment';
-  
-      // Add all payment parameters as hidden inputs
-      Object.keys(paymentParams).forEach(key => {
+      form.action = PAYU_BASE_URL;
+      
+      Object.entries(paymentParams).forEach(([key, value]) => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = key;
-        input.value = paymentParams[key];
+        input.value = value;
         form.appendChild(input);
       });
-  
+      
       document.body.appendChild(form);
       form.submit();
-
+      
       localStorage.removeItem('cart');
-    setCartItems([]);
-    setGroupedItems({});
-    window.dispatchEvent(new Event('cartUpdate'));
-  
+      setCartItems([]);
+      setGroupedItems({});
+      window.dispatchEvent(new Event('cartUpdate'));
       
     } catch (error) {
       console.error('Payment initiation error:', error);
@@ -229,10 +239,8 @@ const Cart = () => {
         duration: 3000,
         isClosable: true,
       });
-      return null;
     }
   };
-
   
 
   if (cartItems.length === 0) {
