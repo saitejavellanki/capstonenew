@@ -164,67 +164,48 @@ const Cart = () => {
 
   const initiatePayUPayment = async (shopData) => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const txnid = `TXN_${Date.now()}`;
     
-    // Create transaction data with conditional vendorId
-    const transactionData = {
-      shopId: shopData.shopId,
-      // Only include vendorId if it exists
-      ...(shopData.vendorId && { vendorId: shopData.vendorId }),
-      userId: user.uid,
-      shopName: shopData.shopName,
-      items: shopData.items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        category: item.category,
-        dietType: item.dietType,
-        imageUrl: item.imageUrl
-      })),
-      total: shopData.total,
-      status: 'pending',
-      paymentStatus: 'pending',
-      customerEmail: user.email,
-      createdAt: new Date(),
-      txnid: txnid,
-      clearCart: true,
-      // Add a type field to distinguish between grocery and other orders
-      orderType: shopData.shopId === 'grocery-store' ? 'grocery' : 'restaurant'
-    };
-
     try {
-      const transactionRef = await addDoc(collection(firestore, 'transactions'), transactionData);
+      // Call backend to initialize payment
+      const response = await fetch(`http://localhost:5058/initiate-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shopData: {
+            ...shopData,
+            total: shopData.total
+          },
+          userData: user
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to initialize payment');
+      }
+  
+      const paymentData = await response.json();
       
-      const paymentParams = {
-        key: 'gSR07M',
-        txnid: txnid,
-        amount: shopData.total.toFixed(2),
-        productinfo: `Order from ${shopData.shopName}`,
-        firstname: user.displayName || 'Customer',
-        email: user.email,
-        phone: user.phoneNumber || '',
-        surl: `https://fostservernew.onrender.com/payment-success?transactionId=${txnid}`,
-        furl: 'https://main.d15io2iwu35boj.amplifyapp.com/',
-      };
-      
-      paymentParams.hash = generatePayUHash(paymentParams);
-      
+      // Create and submit payment form
       const form = document.createElement('form');
       form.method = 'post';
-      form.action = PAYU_BASE_URL;
+      form.action = paymentData.payuBaseUrl;
       
-      Object.entries(paymentParams).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
+      Object.entries(paymentData).forEach(([key, value]) => {
+        if (key !== 'payuBaseUrl') {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        }
       });
       
       document.body.appendChild(form);
       form.submit();
       
+      // Clear cart after form submission
       localStorage.removeItem('cart');
       setCartItems([]);
       setGroupedItems({});
@@ -241,7 +222,6 @@ const Cart = () => {
       });
     }
   };
-  
 
   if (cartItems.length === 0) {
     return (
