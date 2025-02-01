@@ -138,9 +138,9 @@ function App() {
             {/* Vendor Routes */}
             <Route path="/vendor" element={
               <ProtectedRoute requiredRole="vendor">
-                <VendorWelcomeCheck>
+                
                   <VendorLayout />
-                </VendorWelcomeCheck>
+                
               </ProtectedRoute>
             }>
               <Route path="MobileScanner" element={<VendorDashboard />} />
