@@ -143,7 +143,7 @@ function App() {
                 </VendorWelcomeCheck>
               </ProtectedRoute>
             }>
-              <Route path="dashboard" element={<VendorDashboard />} />
+              <Route path="MobileScanner" element={<VendorDashboard />} />
               <Route path="items" element={<VendorItems />} />
               <Route path="orders" element={<VendorOrders />} />
               <Route path="ProcessingVendors" element={<ProcessingOrders />} />

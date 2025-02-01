@@ -90,242 +90,13 @@ const calculateOrderPriority = (order) => {
   };
 };
 
-const OrderCard = ({ order, onUpdateStatus, expandedOrders, toggleOrderExpansion, onScanQR, showActions = true }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const priority = calculateOrderPriority(order);
 
- 
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'yellow';
-      case 'processing': return 'blue';
-      case 'completed': return 'green';
-      case 'cancelled': return 'red';
-      default: return 'gray';
-    }
-  };
-
-  return (
-    <Box 
-      borderWidth={1} 
-      borderRadius="lg" 
-      p={4} 
-      bg={bgColor} 
-      borderColor={getCategoryColor(priority.category)}
-      borderLeftWidth={4}
-      shadow="md"
-      mb={4}
-      width="100%"
-    >
-      <Flex justifyContent="space-between" alignItems="center">
-        <VStack align="start" spacing={2}>
-          <HStack>
-            <Text fontWeight="bold">Order #{order.id.slice(-6)}</Text>
-            <Text color="gray.500" fontSize="sm">
-              {order.createdAt.toLocaleString()}
-            </Text>
-          </HStack>
-          <HStack>
-            <Badge colorScheme={getCategoryColor(priority.category)}>
-              {priority.category.toUpperCase()}
-            </Badge>
-            <Badge colorScheme="purple">
-              {priority.totalItems} {priority.totalItems === 1 ? 'item' : 'items'}
-            </Badge>
-            <Badge colorScheme="yellow">
-              ~{priority.estimatedPrepTime} min
-            </Badge>
-            {priority.waitTime > 10 && order.status !== 'completed' && (
-              <Badge colorScheme="red">
-                <HStack spacing={1}>
-                  <AiOutlineFire />
-                  <Text>{priority.waitTime} min wait</Text>
-                </HStack>
-              </Badge>
-            )}
-          </HStack>
-        </VStack>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => toggleOrderExpansion(order.id)}
-        >
-          {expandedOrders[order.id] ? <AiOutlineUp /> : <AiOutlineDown />}
-        </Button>
-      </Flex>
-
-      {/* <Collapse in={expandedOrders[order.id]} animateOpacity> */}
-        <Box mt={4}>
-          <Divider mb={4} />
-          <Table size="sm">
-            <Thead>
-              <Tr>
-                <Th>Item</Th>
-                <Th isNumeric>Quantity</Th>
-                <Th isNumeric>Price</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {order.items?.map((item, index) => (
-                <Tr key={index}>
-                  <Td>{item.name}</Td>
-                  <Td isNumeric>{item.quantity}</Td>
-                  <Td isNumeric>${item.price?.toFixed(2)}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-
-          {showActions && (
-            <HStack mt={4} spacing={2} justifyContent="flex-end">
-              {order.status === 'pending' && (
-                <Button 
-                  size="sm" 
-                  colorScheme={getCategoryColor(priority.category)}
-                  onClick={() => onUpdateStatus(order.id, 'processing')}
-                  leftIcon={<AiOutlinePlayCircle />}
-                >
-                  Start Processing
-                </Button>
-              )}
-              {order.status === 'processing' && (
-                <>
-                  <Button 
-                    size="sm" 
-                    colorScheme="green"
-                    onClick={() => onUpdateStatus(order.id, 'completed')}
-                    leftIcon={<AiOutlineCheckCircle />}
-                  >
-                    Mark as Ready
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    colorScheme="red"
-                    variant="outline"
-                    onClick={() => onUpdateStatus(order.id, 'cancelled')}
-                    leftIcon={<AiOutlineStop />}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-              {order.status === 'completed' && (
-                <Button
-                  size="sm"
-                  colorScheme="blue"
-                  onClick={() => onScanQR(order)}
-                  leftIcon={<AiOutlineCheckCircle />}
-                >
-                  Scan QR for Pickup
-                </Button>
-              )}
-            </HStack>
-          )}
-        </Box>
-      {/* </Collapse> */}
-    </Box>
-  );
-};
-
-const KanbanColumn = ({ title, orders, onUpdateStatus, expandedOrders, toggleOrderExpansion, onScanQR, icon, colorScheme }) => {
-  const bgColor = useColorModeValue('gray.50', 'gray.700');
-  const [expandedCategories, setExpandedCategories] = useState({
-    express: false,
-    standard: false,
-    complex: false
-  });
-  
-  const groupedOrders = orders.reduce((acc, order) => {
-    const priority = calculateOrderPriority(order);
-    if (!acc[priority.category]) {
-      acc[priority.category] = [];
-    }
-    acc[priority.category].push(order);
-    return acc;
-  }, {});
-
-  
-
-  const toggleCategory = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
-
-  return (
-    <Box 
-      width="100%"
-      height="calc(100vh - 200px)"
-      overflowY="auto"
-      p={4}
-      bg={bgColor}
-      borderRadius="lg"
-    >
-      <Heading size="md" mb={4}>
-        <HStack>
-          {icon}
-          <Text>{title}</Text>
-          <Badge colorScheme={colorScheme}>
-            {orders.length}
-          </Badge>
-        </HStack>
-      </Heading>
-
-      {['express', 'standard', 'complex'].map(category => (
-        groupedOrders[category]?.length > 0 && (
-          <Box key={category} mb={6}>
-            <HStack 
-              spacing={2} 
-              mb={2}
-              cursor="pointer"
-              onClick={() => toggleCategory(category)}
-              align="center"
-            >
-              <Button
-                size="sm"
-                variant="ghost"
-                p={0}
-                minW="auto"
-                h="auto"
-              >
-                {expandedCategories[category] ? <AiOutlineUp /> : <AiOutlineDown />}
-              </Button>
-              <Heading 
-                size="sm" 
-                color={`${getCategoryColor(category)}.500`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)} Orders ({groupedOrders[category].length})
-              </Heading>
-            </HStack>
-            
-            
-              <VStack spacing={4} align="stretch">
-                {groupedOrders[category].map(order => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onUpdateStatus={onUpdateStatus}
-                    expandedOrders={expandedOrders}
-                    toggleOrderExpansion={toggleOrderExpansion}
-                    onScanQR={onScanQR}
-                  />
-                ))}
-              </VStack>
-            
-          </Box>
-        )
-      ))}
-    </Box>
-  );
-};
 
 const QRScannerModal = ({ isOpen, onClose, order, onScanComplete }) => {
   const handleQRScan = async (result) => {
     try {
       const scannedValue = result[0]?.rawValue;
-      const expectedValue = `order-pickup:${order.id}`;
+      const expectedValue = `${order.id}`;
       
       if (scannedValue === expectedValue) {
         await onScanComplete(order.id);
@@ -372,36 +143,91 @@ const VendorOrderDashboard = () => {
   const toast = useToast();
   const firestore = getFirestore();
 
-  const toggleOrderExpansion = (orderId) => {
-    setExpandedOrders(prev => ({
-      ...prev,
-      [orderId]: !prev[orderId]
-    }));
-  };
-
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem('user'));
+      console.log('Current user from localStorage:', user); // Debug user info
+  
+      if (!user || !user.shopId) {
+        console.error('No user or shopId found in localStorage');
+        throw new Error('Shop ID not found. Please login again.');
+      }
+  
+      console.log('Attempting to fetch orders for shopId:', user.shopId);
+      
       const ordersRef = collection(firestore, 'orders');
-      const q = query(ordersRef, where('shopId', '==', user.shopId));
+      const q = query(ordersRef);  // Temporarily remove filter to see ALL orders
+      
+      console.log('Executing Firestore query...');
       const snapshot = await getDocs(q);
+      console.log('Total documents found:', snapshot.size);
       
-      const ordersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date()
-      })).sort((a, b) => a.createdAt - b.createdAt);
+      // Log all orders before filtering
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        console.log('Raw order data:', {
+          id: doc.id,
+          shopId: data.shopId,
+          status: data.status,
+          customerEmail: data.customerEmail || data.customer?.email,
+          total: data.totalAmount || data.total
+        });
+      });
+  
+      // Now filter manually to see what's being excluded
+      const allOrders = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt) || new Date(),
+          items: Array.isArray(data.items) ? data.items : [],
+          total: data.totalAmount || data.total || 0,
+          customer: {
+            email: data.customerEmail || data.customer?.email,
+            id: data.customerId || data.customer?.id || data.userId,
+            name: data.customerName || data.customer?.name
+          }
+        };
+      });
+  
+      console.log('All orders before shopId filter:', allOrders.length);
       
-      setOrders(ordersList);
-      setFilteredOrders(ordersList);
+      const filteredOrders = allOrders.filter(order => {
+        const matches = order.shopId === user.shopId;
+        if (!matches) {
+          console.log('Order excluded:', {
+            orderId: order.id,
+            orderShopId: order.shopId,
+            userShopId: user.shopId
+          });
+        }
+        return matches;
+      });
+  
+      console.log('Orders after shopId filter:', filteredOrders.length);
+      
+      const sortedOrders = filteredOrders.sort((a, b) => b.createdAt - a.createdAt);
+      
+      setOrders(sortedOrders);
+      setFilteredOrders(sortedOrders);
       setLastUpdateTime(new Date());
+  
+      // Log final processed orders
+      console.log('Final processed orders:', sortedOrders.map(order => ({
+        id: order.id,
+        status: order.status,
+        customerEmail: order.customer.email,
+        total: order.total,
+        createdAt: order.createdAt
+      })));
+  
     } catch (error) {
-      console.error('Failed to fetch orders', error);
+      console.error('Failed to fetch orders:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch orders',
+        description: error.message,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -613,75 +439,7 @@ const VendorOrderDashboard = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <Flex direction={{ base: 'column', xl: 'row' }} gap={6}>
-        <VStack spacing={6} align="stretch" flex="3">
-          <HStack justify="space-between" mb={4}>
-            <Heading size="xl">Orders Dashboard</Heading>
-            <Box>
-              <Text fontSize="sm" color="gray.500">
-                Last updated: {lastUpdateTime.toLocaleTimeString()}
-              </Text>
-              {loading && <Badge ml={2} colorScheme="blue">Refreshing...</Badge>}
-            </Box>
-          </HStack>
-
-          <HStack spacing={4}>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <AiOutlineSearch />
-              </InputLeftElement>
-              <Input 
-                placeholder="Search orders..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </InputGroup>
-            <Select 
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              width="200px"
-            >
-              <option value="all">All Categories</option>
-              <option value="express">Express</option>
-              <option value="standard">Standard</option>
-              <option value="complex">Complex</option>
-            </Select>
-          </HStack>
-
-          <SimpleGrid columns={[1, 1, 3]} spacing={4} width="100%">
-            <KanbanColumn
-              title="Pending Orders"
-              orders={filteredOrders.filter(order => order.status === 'pending')}
-              onUpdateStatus={updateOrderStatus}
-              expandedOrders={expandedOrders}
-              toggleOrderExpansion={toggleOrderExpansion}
-              onScanQR={handleScanQR}
-              icon={<AiOutlineClockCircle />}
-              colorScheme="yellow"
-            />
-
-            <KanbanColumn
-              title="Processing"
-              orders={filteredOrders.filter(order => order.status === 'processing')}
-              onUpdateStatus={updateOrderStatus}
-              expandedOrders={expandedOrders}
-              toggleOrderExpansion={toggleOrderExpansion}
-              onScanQR={handleScanQR}
-              icon={<AiOutlinePlayCircle />}
-              colorScheme="blue"
-            />
-
-            <KanbanColumn
-              title="Ready for Pickup"
-              orders={filteredOrders.filter(order => order.status === 'completed')}
-              onUpdateStatus={updateOrderStatus}
-              expandedOrders={expandedOrders}
-              toggleOrderExpansion={toggleOrderExpansion}
-              onScanQR={handleScanQR}
-              icon={<AiOutlineCheckCircle />}
-              colorScheme="green"
-            />
-          </SimpleGrid>
-        </VStack>
+        
 
         <Box flex="1" position="sticky" top="20px" height="fit-content">
           <Box borderWidth={1} borderRadius="lg" p={4} bg={useColorModeValue('white', 'gray.800')}>

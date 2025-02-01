@@ -66,7 +66,7 @@ const OrderWaitingPage = () => {
   const iconSize = useBreakpointValue({ base: 8, md: 10 });
 
   // Generate unique QR code value
-  const qrCodeValue = `order-pickup:${orderid}`;
+  const qrCodeValue = `${orderid}`;
 
   useEffect(() => {
     const checkOrderAuthorization = async () => {

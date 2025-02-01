@@ -10,12 +10,12 @@ const FOOD_CATEGORIES = [
     description: 'Explore our delicious menu options',
     route: '/main'
   },
-  {
-    icon: FaShoppingBasket,
-    title: 'Groceries',
-    description: 'Fresh products delivered to you',
-    route: '/groceriesbyfost'
-  },
+  // {
+  //   icon: FaShoppingBasket,
+  //   title: 'Groceries',
+  //   description: 'Fresh products delivered to you',
+  //   route: '/groceriesbyfost'
+  // },
 ];
 
 const FoodCategories = () => {

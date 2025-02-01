@@ -25,6 +25,7 @@ import { SearchIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 import OrderDetails from '../../Components/order/OrderDetails';
 import CancelOrderDialog from '../utils/CancelOrderDialog';
+import OrderScanner from '../../Components/externalScanner';
 
 const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -332,6 +333,11 @@ const ProcessingOrders = () => {
           </Box>
         </Box>
       </Box>
+      <OrderScanner 
+        onOrderProcessed={(orderId) => {
+          fetchProcessingOrders();
+        }} 
+      />
       <OrderDetails
         isOpen={isModalOpen}
         onClose={() => {
