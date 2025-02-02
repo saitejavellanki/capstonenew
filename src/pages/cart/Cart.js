@@ -167,7 +167,7 @@ const Cart = () => {
     
     try {
       // Call backend to initialize payment
-      const response = await fetch(`http://3.111.34.87:5058/initiate-payment`, {
+      const response = await fetch(`https://fostservernew-1.onrender.com/initiate-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
