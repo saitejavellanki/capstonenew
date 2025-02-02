@@ -98,7 +98,7 @@ const ProcessingOrders = () => {
       };
 
       // Send notification
-      await axios.post('https://fostservernew.onrender.com/sendnotification', notificationPayload);
+      await axios.post('https://fostservernew-1.onrender.com/sendnotification', notificationPayload);
 
       console.log('Notification sent successfully');
     } catch (error) {
