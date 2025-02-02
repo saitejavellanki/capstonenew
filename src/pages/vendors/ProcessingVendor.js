@@ -98,7 +98,7 @@ const ProcessingOrders = () => {
       };
 
       // Send notification
-      await axios.post('https://fostserver-lb1-1505521900.ap-south-1.elb.amazonaws.com/sendnotification', notificationPayload);
+      await axios.post('https://fosterman.click/sendnotification', notificationPayload);
 
       console.log('Notification sent successfully');
     } catch (error) {
