@@ -39,7 +39,7 @@ import VendorLayout from './layouts/VendorLayout';
 import AnalyticsDashboard from './pages/vendors/AnalyticsVendor';
 import AdvancedAnalytics from './pages/vendors/AdvancedAnalytic';
 import OrderHistory from './pages/vendors/HistoryVendors';
-import KPIDashboard from './pages/vendors/KPIVendors';
+
 import InventoryManagement from './pages/vendors/InventoryManagement';
 import AccountDeletionPage from './pages/utils/AccountDeletion';
 
@@ -47,6 +47,9 @@ import AccountDeletionPage from './pages/utils/AccountDeletion';
 import GroceryPage from './pages/groceriesPage/GroceriesPage';
 import GroceryDashboard from './pages/groceriesPage/DashBoardGroceries';
 import OrderProcessPage from './pages/groceriesPage/orderProcessingPage';
+import VendorApplication from './pages/Auth/Vendor-application';
+
+import TransactionError from './pages/utils/TransactionErrorPage';
  // Add this import
 
 const ProtectedRoute = ({ children, requiredRole }) => {
