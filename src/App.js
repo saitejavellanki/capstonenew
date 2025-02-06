@@ -47,7 +47,7 @@ import AccountDeletionPage from './pages/utils/AccountDeletion';
 import GroceryPage from './pages/groceriesPage/GroceriesPage';
 import GroceryDashboard from './pages/groceriesPage/DashBoardGroceries';
 import OrderProcessPage from './pages/groceriesPage/orderProcessingPage';
-import VendorApplication from './pages/Auth/Vendor-application';
+
 
 import TransactionError from './pages/utils/TransactionErrorPage';
  // Add this import
