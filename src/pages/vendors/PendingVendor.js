@@ -26,6 +26,7 @@ import OrderDetails from '../../Components/order/OrderDetails';
 import CancelOrderDialog from '../utils/CancelOrderDialog';
 import OrderScanner from '../../Components/externalScanner';
 
+
 const PendingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +45,7 @@ const PendingOrders = () => {
       const user = JSON.parse(localStorage.getItem('user'));
       const firestore = getFirestore();
       const ordersRef = collection(firestore, 'orders');
+      
       const q = query(
         ordersRef,
         where('shopId', '==', user.shopId),
@@ -51,10 +53,42 @@ const PendingOrders = () => {
       );
       
       const snapshot = await getDocs(q);
-      const ordersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const ordersData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          createdAt: data.createdAt || new Date().toISOString(),
+          customerEmail: data.customerEmail || 'N/A',
+          customerId: data.customerId || 'N/A',
+          items: (data.items || []).map(item => ({
+            category: item.category || 'N/A',
+            description: item.description || '',
+            dietType: item.dietType || 'N/A',
+            id: item.id || '',
+            imageUrl: item.imageUrl || '',
+            isActive: item.isActive || false,
+            name: item.name || 'Unnamed Item',
+            price: item.price || 0,
+            quantity: item.quantity || 1,
+            shopId: item.shopId || '',
+            shopName: item.shopName || '',
+            vendorId: item.vendorId || ''
+          })),
+          processedAt: data.processedAt || null,
+          shopId: data.shopId || '',
+          shopName: data.shopName || '',
+          status: data.status || 'pending',
+          totalAmount: data.totalAmount || 0,
+          updatedAt: data.updatedAt || new Date().toISOString(),
+          customer: {
+            name: data.customerName || 'Guest',
+            phone: data.customerPhone || 'N/A'
+          },
+          clearCart: data.clearCart || false,
+          confirmedAt: data.confirmedAt || null,
+          feedbackSubmitted: data.feedbackSubmitted || false
+        };
+      });
       
       setOrders(ordersData);
 
@@ -84,24 +118,6 @@ const PendingOrders = () => {
       });
     }
   };
-
-  const handleRowClick = (order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
-
-  useEffect(() => {
-    fetchPendingOrders();
-    const interval = setInterval(fetchPendingOrders, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const event = new CustomEvent('newPendingOrder', {
-      detail: { orderCount: orders.length }
-    });
-    window.dispatchEvent(event);
-  }, [orders]);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
@@ -142,13 +158,72 @@ const PendingOrders = () => {
 
   const handleAcceptClick = async (e, order) => {
     e.stopPropagation();
-    await handleStatusUpdate(order.id, 'processing');
+    
+    try {
+      // Prepare the order data for printing
+      const printData = {
+        orderId: order.id,
+        items: order.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        shopName: order.shopName || 'Your Shop Name',
+        customerName: order.customerName
+      };
+  
+      // Use the full URL to your backend server
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5337'; // Adjust port as needed
+      const response = await fetch(`${BACKEND_URL}/print-receipt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(printData)
+      });
+  
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text(); // Get error text instead of trying to parse JSON
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+  
+      const result = await response.json();
+  
+      // Show success toast
+      toast({
+        title: 'Receipt Printed',
+        description: result.message,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+  
+      // Update order status
+      await handleStatusUpdate(order.id, 'processing');
+  
+    } catch (error) {
+      console.error('Error processing order:', error);
+      toast({
+        title: 'Error Processing Order',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleCancelClick = (e, order) => {
     e.stopPropagation();
     setSelectedOrder(order);
     setIsCancelDialogOpen(true);
+  };
+
+  const handleRowClick = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
   };
 
   const calculateTotalItems = (items) => {
@@ -175,6 +250,19 @@ const PendingOrders = () => {
       return 'Invalid Date';
     }
   };
+
+  useEffect(() => {
+    fetchPendingOrders();
+    const interval = setInterval(fetchPendingOrders, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const event = new CustomEvent('newPendingOrder', {
+      detail: { orderCount: orders.length }
+    });
+    window.dispatchEvent(event);
+  }, [orders]);
 
   const filteredOrders = orders.filter(order => 
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
