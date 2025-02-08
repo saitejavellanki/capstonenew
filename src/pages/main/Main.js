@@ -24,7 +24,7 @@ import { Link } from "react-router-dom";
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../Components/firebase/Firebase';
 import { FaSearch, FaStar, FaClock, FaFilter, FaLeaf, FaTag, FaAward } from "react-icons/fa";
-import Footer from "../../Components/footer/Footer";
+
 
 const ShopCard = ({ shop }) => {
   const cardBg = useColorModeValue("white", "gray.800");
@@ -381,7 +381,7 @@ const Main = () => {
           </Grid>
         )}
       </Container>
-      <Footer />
+      
     </Box>
   );
 };
