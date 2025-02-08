@@ -111,32 +111,53 @@ const Cart = () => {
   };
 
   const updateQuantity = (itemId, newQuantity) => {
-    // Automatically remove item if quantity drops to 0
     if (newQuantity === 0) {
       removeFromCart(itemId);
       return;
     }
     
-    const updatedCart = cartItems.map(item => 
-      item.id === itemId ? { ...item, quantity: newQuantity } : item
-    );
+    const updatedCart = cartItems.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          quantity: newQuantity,
+          // Ensure all required fields are preserved
+          vendorId: item.vendorId,
+          category: item.category,
+          dietType: item.dietType,
+          price: parseFloat(item.price)
+        };
+      }
+      return item;
+    });
     
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCartItems(updatedCart);
-
     window.dispatchEvent(new Event('cartUpdate'));
     
+    // Update grouped items with consistent structure
     const grouped = updatedCart.reduce((acc, item) => {
       const shopId = item.shopId;
       if (!acc[shopId]) {
         acc[shopId] = {
           items: [],
           shopName: item.shopName,
+          shopId: item.shopId,
+          vendorId: item.vendorId,
           total: 0
         };
       }
-      acc[shopId].items.push(item);
-      acc[shopId].total += item.price * item.quantity;
+      acc[shopId].items.push({
+        id: item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        imageUrl: item.imageUrl,
+        category: item.category,
+        dietType: item.dietType,
+        vendorId: item.vendorId
+      });
+      acc[shopId].total += parseFloat(item.price) * item.quantity;
       return acc;
     }, {});
     
