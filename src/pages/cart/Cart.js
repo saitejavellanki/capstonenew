@@ -315,7 +315,7 @@ const Cart = () => {
   return (
     <Container maxW="container.xl" py={containerPadding}>
       <VStack spacing={6} align="stretch">
-        <Heading size={{ base: "lg", md: "xl" }}>Shopping Cart</Heading>
+        {/* <Heading size={{ base: "lg", md: "xl" }}>Shopping Cart</Heading> */}
 
         {Object.entries(groupedItems).map(([shopId, shopData]) => (
           <Box 
