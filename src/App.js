@@ -42,14 +42,17 @@ import OrderHistory from './pages/vendors/HistoryVendors';
 
 import InventoryManagement from './pages/vendors/InventoryManagement';
 import AccountDeletionPage from './pages/utils/AccountDeletion';
+import TransactionError from './pages/utils/TransactionErrorPage';
 
 
 import GroceryPage from './pages/groceriesPage/GroceriesPage';
 import GroceryDashboard from './pages/groceriesPage/DashBoardGroceries';
 import OrderProcessPage from './pages/groceriesPage/orderProcessingPage';
 
+import LevelProgression from './Components/Level/LevelProgression';
 
-import TransactionError from './pages/utils/TransactionErrorPage';
+
+
  // Add this import
 
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -114,7 +117,7 @@ function App() {
             <Route path="/addcoupon" element={<AddCouponForm />} />
             <Route path="/deleteAccount" element={<AccountDeletionPage />} />
             <Route path="/Groceriesbyfost" element={<GroceryPage />} />
-            <Route path="/AdminDashboard" element={<AdminDashboard />} />
+           
             <Route path="/Error" element={<TransactionError />} />
             <Route path="/levels" element={<LevelProgression />} />
 
