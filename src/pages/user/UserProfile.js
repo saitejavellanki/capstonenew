@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, orderBy, getDoc, doc } from 'firebase/firestore';
 import {
   Container,
   VStack,
@@ -28,6 +28,7 @@ import {
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { format } from 'date-fns';
 import UserLevelStatus from './UserLevelStatus';
+import HealthPointsDisplay from '../utils/HealthPointDisplay';
 
 const UserProfile = () => {
   const [orders, setOrders] = useState([]);
@@ -36,6 +37,7 @@ const UserProfile = () => {
   const [indexError, setIndexError] = useState(null);
   const toast = useToast();
   const firestore = getFirestore();
+  const [userData, setUserData] = useState(null);
 
   // Color mode values
   const cardBg = useColorModeValue('white', 'gray.800');
@@ -44,8 +46,81 @@ const UserProfile = () => {
   const tabBg = useColorModeValue('gray.50', 'gray.700');
 
   useEffect(() => {
-    fetchUserOrders();
-  }, []);
+    const initializeProfile = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) throw new Error('No user found');
+  
+        // Fetch user data
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        }
+  
+        // Fetch orders
+        const ordersRef = collection(firestore, 'orders');
+        try {
+          const q = query(
+            ordersRef,
+            where('userId', '==', user.uid),
+            orderBy('createdAt', 'desc')
+          );
+          
+          const snapshot = await getDocs(q);
+          const ordersList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate(),
+            completedAt: doc.data().completedAt?.toDate(),
+            pickedUpAt: doc.data().pickedUpAt?.toDate()
+          }));
+  
+          setOrders(ordersList);
+          setLoading(false);
+          setIndexError(null);
+        } catch (indexErr) {
+          if (indexErr.code === 'failed-precondition') {
+            const fallbackQuery = query(
+              ordersRef,
+              where('userId', '==', user.uid)
+            );
+            
+            const snapshot = await getDocs(fallbackQuery);
+            const ordersList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate(),
+              completedAt: doc.data().completedAt?.toDate(),
+              pickedUpAt: doc.data().pickedUpAt?.toDate()
+            }))
+            .sort((a, b) => b.createdAt - a.createdAt);
+  
+            setOrders(ordersList);
+            setLoading(false);
+            
+            setIndexError({
+              message: 'For better performance, please create the required index.',
+              link: 'https://console.firebase.google.com/v1/r/project/rentals-5085c/firestore/indexes?create_composite=Ckxwcm9qZWN0cy9yZW50YWxzLTUwODVjL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy9vcmRlcnMvaW5kZXhlcy9fEAEaCgoGdXNlcklkEAEaDQoJY3JlYXR'
+            });
+          } else {
+            throw indexErr;
+          }
+        }
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch your data',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    };
+  
+    initializeProfile();
+  }, [firestore, toast]);
 
   const fetchUserOrders = async () => {
     try {
@@ -294,8 +369,13 @@ const UserProfile = () => {
           <Heading size="lg" mb={2}>My Orders</Heading>
           <Text color="gray.500">View and track all your orders</Text>
         </Box>
+        {userData && (
+    <HealthPointsDisplay points={userData.points || 0} />
+  )}
 
         <UserLevelStatus orderCount={orders.length} />
+
+        
 
         <Tabs variant="enclosed-colored" colorScheme="blue">
           <TabList>

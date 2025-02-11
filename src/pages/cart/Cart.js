@@ -73,7 +73,8 @@ const Cart = () => {
             quantity: item.quantity,
             imageUrl: item.imageUrl,
             category: item.category,
-            dietType: item.dietType // Include additional item fields
+            dietType: item.dietType,
+            point: item.point// Include additional item fields
           });
           acc[item.shopId].total += item.price * item.quantity;
           return acc;
@@ -155,7 +156,9 @@ const Cart = () => {
         imageUrl: item.imageUrl,
         category: item.category,
         dietType: item.dietType,
-        vendorId: item.vendorId
+        point: item.point,
+        vendorId: item.vendorId,
+        
       });
       acc[shopId].total += parseFloat(item.price) * item.quantity;
       return acc;

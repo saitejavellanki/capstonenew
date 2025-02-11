@@ -114,9 +114,9 @@ function App() {
             <Route path="/addcoupon" element={<AddCouponForm />} />
             <Route path="/deleteAccount" element={<AccountDeletionPage />} />
             <Route path="/Groceriesbyfost" element={<GroceryPage />} />
-            
+            <Route path="/AdminDashboard" element={<AdminDashboard />} />
             <Route path="/Error" element={<TransactionError />} />
-            
+            <Route path="/levels" element={<LevelProgression />} />
 
             {/* Protected User Routes */}
             <Route path="/main" element={<ProtectedRoute><Main /></ProtectedRoute>} />

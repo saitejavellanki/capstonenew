@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.12.10",
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
@@ -28,6 +29,7 @@
     "framer-motion": "^11.3.28",
     "heroicons": "^2.2.0",
     "https-browserify": "^1.0.0",
+    "iconv-lite": "^0.6.3",
     "lucide-react": "^0.460.0",
     "mongoose": "^8.7.1",
     "node-fetch": "^3.3.2",
@@ -40,6 +42,7 @@
     "react-confetti": "^6.1.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
+    "react-query": "^3.39.3",
     "react-router-dom": "^6.26.1",
     "react-scripts": "^5.0.1",
     "react-slick": "^0.30.2",
@@ -54,8 +57,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env NODE_OPTIONS=--max-old-space-size=8192 react-scripts start",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -83,6 +86,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "html-webpack-plugin": "^5.6.3",
     "react-app-rewired": "^2.2.1"
   }
