@@ -151,11 +151,23 @@ const Navbar = () => {
   const CartButton = () => (
     <Button
       leftIcon={<ShoppingCart size={20} />}
-      variant="solid"
-      colorScheme="orange"
+      bg="orange.500"
+      color="white"
+      border="2px solid black"
+      boxShadow="4px 4px 0 black"
       size={isMobile ? "sm" : "md"}
       onClick={() => navigate('/cart')}
       position="relative"
+      _hover={{
+        bg: "orange.600",
+        transform: "translate(-2px, -2px)",
+        boxShadow: "6px 6px 0 black"
+      }}
+      _active={{
+        bg: "orange.700",
+        transform: "translate(0px, 0px)",
+        boxShadow: "2px 2px 0 black"
+      }}
     >
       Cart
       {cartCount > 0 && (
@@ -171,7 +183,6 @@ const Navbar = () => {
       )}
     </Button>
   );
-
   const extractNameFromEmail = (email) => {
     return email ? email.split('@')[0] : '';
   };
@@ -248,8 +259,18 @@ const Navbar = () => {
   const AuthButtons = () => (
     <Flex direction={isMobile ? "column" : "row"} gap={2}>
       <Button
-        colorScheme="blue"
-        variant="outline"
+        bg="white"
+        color="black"
+        border="2px solid black"
+        boxShadow="4px 4px 0 black"
+        _hover={{
+          transform: "translate(-2px, -2px)",
+          boxShadow: "6px 6px 0 black"
+        }}
+        _active={{
+          transform: "translate(0px, 0px)",
+          boxShadow: "2px 2px 0 black"
+        }}
         onClick={() => {
           navigate('/login');
           onClose();
@@ -259,7 +280,18 @@ const Navbar = () => {
         Login
       </Button>
       <Button
-        colorScheme="green"
+        bg="white"
+        color="black"
+        border="2px solid black"
+        boxShadow="4px 4px 0 black"
+        _hover={{
+          transform: "translate(-2px, -2px)",
+          boxShadow: "6px 6px 0 black"
+        }}
+        _active={{
+          transform: "translate(0px, 0px)",
+          boxShadow: "2px 2px 0 black"
+        }}
         onClick={() => {
           navigate('/register');
           onClose();
@@ -270,11 +302,21 @@ const Navbar = () => {
       </Button>
     </Flex>
   );
-
   const NavLinks = () => (
     <HStack spacing={4}>
       <Button
-        variant="ghost"
+        bg="white"
+        color="black"
+        border="2px solid black"
+        boxShadow="4px 4px 0 black"
+        _hover={{
+          transform: "translate(-2px, -2px)",
+          boxShadow: "6px 6px 0 black"
+        }}
+        _active={{
+          transform: "translate(0px, 0px)",
+          boxShadow: "2px 2px 0 black"
+        }}
         onClick={() => {
           navigate('/howitworks');
           onClose();
@@ -283,7 +325,18 @@ const Navbar = () => {
         How It Works
       </Button>
       <Button
-        variant="ghost"
+        bg="white"
+        color="black"
+        border="2px solid black"
+        boxShadow="4px 4px 0 black"
+        _hover={{
+          transform: "translate(-2px, -2px)",
+          boxShadow: "6px 6px 0 black"
+        }}
+        _active={{
+          transform: "translate(0px, 0px)",
+          boxShadow: "2px 2px 0 black"
+        }}
         onClick={() => {
           navigate('/aboutus');
           onClose();

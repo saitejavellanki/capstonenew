@@ -506,14 +506,15 @@ const Home = () => {
           pt={{ base: 4, md: 8, lg: 12 }}
         >
           <VStack spacing={6} maxW="800px">
-            <Heading
-              fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
-              fontWeight="black"
-              color="teal.800"
-              lineHeight="shorter"
-            >
-              Less Waiting, Healthy Eating!
-            </Heading>
+          <Heading
+  fontSize={["3xl", "4xl", "5xl"]}
+  fontWeight="700"
+  color="black"
+  lineHeight="1.2"
+  fontFamily="Inter, system-ui, sans-serif"
+>
+  Less Waiting, Healthy Eating!
+</Heading>
 
             <Box width="100%">
     <FoodCategories />
@@ -594,7 +595,7 @@ const Home = () => {
             mb={6} 
             textAlign="center"
             fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
-            color="teal.800"
+            color="black"
           >
             Popular Restaurants Nearby
           </Heading>

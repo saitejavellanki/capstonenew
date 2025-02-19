@@ -20,12 +20,9 @@ const FOOD_CATEGORIES = [
 
 const FoodCategories = () => {
   const navigate = useNavigate();
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const iconColor = useColorModeValue('blue.500', 'blue.300');
-  const titleColor = useColorModeValue('gray.800', 'white');
-  const descColor = useColorModeValue('gray.600', 'gray.300');
+  const iconColor = useColorModeValue('orange.500', 'orange.300');
+  const titleColor = 'black';
+  const descColor = 'gray.600';
 
   return (
     <Container maxW="container.xl" py={{ base: 4, md: 6 }}>
@@ -38,21 +35,23 @@ const FoodCategories = () => {
         {FOOD_CATEGORIES.map((category, index) => (
           <Flex
             key={index}
-            bg={bgColor}
+            bg="white"
             p={{ base: 6, md: 8 }}
             borderRadius="xl"
-            border="1px solid"
-            borderColor={borderColor}
+            border="2px solid black"
+            boxShadow="6px 6px 0 black"
             alignItems="center"
             flexDirection="column"
             textAlign="center"
             cursor="pointer"
             transition="all 0.2s ease"
             _hover={{
-              transform: 'translateY(-2px)',
-              boxShadow: 'lg',
-              bg: hoverBg,
-              borderColor: 'blue.200'
+              transform: "translate(-2px, -2px)",
+              boxShadow: "8px 8px 0 black"
+            }}
+            _active={{
+              transform: "translate(0px, 0px)",
+              boxShadow: "2px 2px 0 black"
             }}
             onClick={() => navigate(category.route)}
             role="button"
