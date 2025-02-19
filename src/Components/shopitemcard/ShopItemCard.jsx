@@ -18,7 +18,6 @@ import { motion } from 'framer-motion';
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
 
-// Separate VegNonVegIndicator component for better reusability
 const VegNonVegIndicator = ({ isVeg, size = "md" }) => {
   const sizes = {
     sm: { outer: "14px", inner: "6px" },
@@ -76,12 +75,18 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
       bg="white"
       borderRadius="lg"
       overflow="hidden"
-      boxShadow="md"
+      boxShadow="6px 6px 0 black"
+      border="2px solid black"
       cursor="pointer"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       height="120px"
       opacity={item.isActive === false ? 0.6 : 1}
+      transition="all 0.2s"
+      _hover={{
+        transform: "translate(-2px, -2px)",
+        boxShadow: "8px 8px 0 black"
+      }}
     >
       {!item.isActive && (
         <Badge
@@ -127,9 +132,19 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
             </Text>
             <Button
               size="sm"
-              colorScheme="orange"
+              bg="white"
+              color="black"
+              border="2px solid black"
+              boxShadow="4px 4px 0 black"
+              _hover={{
+                transform: "translate(-2px, -2px)",
+                boxShadow: "6px 6px 0 black"
+              }}
+              _active={{
+                transform: "translate(0px, 0px)",
+                boxShadow: "2px 2px 0 black"
+              }}
               leftIcon={<FaCartPlus size={12} />}
-              variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
                 onAddToCart(item);
@@ -150,14 +165,18 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
       bg="white"
       borderRadius="xl"
       overflow="hidden"
-      boxShadow="lg"
+      border="2px solid black"
+      boxShadow="6px 6px 0 black"
       cursor="pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
+      transition="all 0.2s"
+      _hover={{
+        transform: "translate(-2px, -2px)",
+        boxShadow: "8px 8px 0 black"
+      }}
       opacity={item.isActive === false ? 0.6 : 1}
     >
       {!item.isActive && (
@@ -184,17 +203,10 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
           onClick={() => onItemClick(item)}
         />
         
-        {/* Veg/Non-veg indicator with proper positioning */}
-        <Box
-          position="absolute"
-          top={3}
-          left={3}
-          zIndex={1}
-        >
+        <Box position="absolute" top={3} left={3} zIndex={1}>
           <VegNonVegIndicator isVeg={item.dietType === 'veg'} size="md" />
         </Box>
 
-        {/* Rating badge */}
         <Box
           position="absolute"
           bottom={3}
@@ -208,7 +220,6 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
           <StarRating rating={item.averageRating} />
         </Box>
 
-        {/* Hover overlay */}
         <Box
           position="absolute"
           top={0}
@@ -238,25 +249,28 @@ const ShopItemCard = ({ item, onAddToCart, onItemClick }) => {
           <Text color="green.600" fontWeight="bold" fontSize="lg">
             ₹{item.price}
           </Text>
-          <MotionFlex
-            animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
-            transition={{ duration: 0.2 }}
+          <Button
+            bg="white"
+            color="black"
+            border="2px solid black"
+            boxShadow="4px 4px 0 black"
+            _hover={{
+              transform: "translate(-2px, -2px)",
+              boxShadow: "6px 6px 0 black"
+            }}
+            _active={{
+              transform: "translate(0px, 0px)",
+              boxShadow: "2px 2px 0 black"
+            }}
+            leftIcon={<FaCartPlus />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart(item);
+            }}
+            isDisabled={!item.isActive}
           >
-            <Button
-              colorScheme="orange"
-              leftIcon={<FaCartPlus />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(item);
-              }}
-              isDisabled={!item.isActive}
-              _hover={{
-                bg: 'orange.100',
-              }}
-            >
-              Add to Cart
-            </Button>
-          </MotionFlex>
+            Add to Cart
+          </Button>
         </Flex>
       </VStack>
     </MotionBox>
