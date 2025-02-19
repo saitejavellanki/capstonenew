@@ -62,126 +62,131 @@ const UserLevelStatus = ({ orderCount = 10 }) => {
     }
   ];
 
-  // Calculate current level
   const currentLevel = levels.reduce((prev, curr) => {
     if (orderCount >= curr.threshold) return curr;
     return prev;
   }, levels[0]);
 
-  // Find next level
   const nextLevelIndex = levels.findIndex(level => level.name === currentLevel.name) + 1;
   const nextLevel = levels[nextLevelIndex] || currentLevel;
 
-  // Calculate progress to next level
   const ordersToNextLevel = nextLevel.threshold - currentLevel.threshold;
   const progressToNextLevel = ordersToNextLevel > 0
     ? ((orderCount - currentLevel.threshold) / ordersToNextLevel) * 100
     : 100;
 
-  // Color mode values
   const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.600', 'gray.300');
   const badgeBg = useColorModeValue('gray.100', 'gray.700');
 
   return (
-    <Box
-      bg={bgColor}
-      borderRadius="xl"
-      p={6}
-      shadow="xl"
-      borderWidth="1px"
-      borderColor={borderColor}
-      mb={8}
-      maxW="2xl"
-      w="full"
-      bgGradient={useColorModeValue(
-        'linear(to-br, white, gray.50)',
-        'linear(to-br, gray.800, gray.900)'
-      )}
-    >
-      <VStack spacing={6} align="stretch">
-        {/* Header Section */}
-        <HStack justify="space-between">
-          <HStack spacing={4}>
-            <Box
-              p={2}
-              borderRadius="lg"
-              bg={currentLevel.accentColor}
-              color={currentLevel.baseColor}
-            >
-              <Icon as={currentLevel.icon} boxSize={6} />
-            </Box>
-            <VStack align="flex-start" spacing={0}>
-              <Text fontSize="sm" color={textColor}>
-                Fost Membership
-              </Text>
-              <Text fontSize="2xl" fontWeight="bold">
-                {currentLevel.name}
-              </Text>
-            </VStack>
-          </HStack>
-          <Badge
-            px={3}
-            py={1}
-            borderRadius="full"
-            colorScheme="gray"
-            variant="solid"
-          >
-            {orderCount} Orders
-          </Badge>
-        </HStack>
-
-        {/* Progress Section */}
-        {nextLevel !== currentLevel && (
-          <Box>
-            <HStack justify="space-between" mb={2}>
-              <Text fontSize="sm" color={textColor}>
-                Progress to {nextLevel.name}
-              </Text>
-              <Tooltip
-                label={`${nextLevel.threshold - orderCount} orders until ${nextLevel.name}`}
-                placement="top"
-                hasArrow
-              >
-                <Text fontSize="sm" color="green.500" fontWeight="semibold">
-                  {Math.round(progressToNextLevel)}%
-                </Text>
-              </Tooltip>
-            </HStack>
-            <Progress
-              value={progressToNextLevel}
-              size="sm"
-              colorScheme="green"
-              borderRadius="full"
-              hasStripe
-              isAnimated
-            />
-          </Box>
+    <Box position="relative">
+      <Box 
+        position="absolute"
+        inset="0"
+        transform="translate(5px, 5px)"
+        bg="black"
+        borderRadius="xl"
+      />
+      <Box
+        position="relative"
+        bg={bgColor}
+        borderRadius="xl"
+        p={6}
+        borderWidth="2px"
+        borderColor="black"
+        maxW="2xl"
+        w="full"
+        _hover={{ transform: 'translate(-2px, -2px)' }}
+        transition="all 0.2s"
+        bgGradient={useColorModeValue(
+          'linear(to-br, white, gray.50)',
+          'linear(to-br, gray.800, gray.900)'
         )}
-
-        {/* Benefits Section */}
-        <Box>
-          <Text fontSize="sm" fontWeight="semibold" mb={3} color={textColor}>
-            Your Benefits
-          </Text>
-          <HStack spacing={2} flexWrap="wrap">
-            {currentLevel.perks.map((perk, index) => (
-              <Badge
-                key={index}
-                px={3}
-                py={1}
-                borderRadius="full"
-                bg={badgeBg}
-                color={textColor}
-                fontSize="sm"
+      >
+        <VStack spacing={6} align="stretch">
+          {/* Header Section */}
+          <HStack justify="space-between">
+            <HStack spacing={4}>
+              <Box
+                p={2}
+                borderRadius="lg"
+                bg={currentLevel.accentColor}
+                color={currentLevel.baseColor}
               >
-                {perk}
-              </Badge>
-            ))}
+                <Icon as={currentLevel.icon} boxSize={6} />
+              </Box>
+              <VStack align="flex-start" spacing={0}>
+                <Text fontSize="sm" color={textColor}>
+                  Fost Membership
+                </Text>
+                <Text fontSize="2xl" fontWeight="bold">
+                  {currentLevel.name}
+                </Text>
+              </VStack>
+            </HStack>
+            <Badge
+              px={3}
+              py={1}
+              borderRadius="full"
+              colorScheme="gray"
+              variant="solid"
+            >
+              {orderCount} Orders
+            </Badge>
           </HStack>
-        </Box>
-      </VStack>
+
+          {/* Progress Section */}
+          {nextLevel !== currentLevel && (
+            <Box>
+              <HStack justify="space-between" mb={2}>
+                <Text fontSize="sm" color={textColor}>
+                  Progress to {nextLevel.name}
+                </Text>
+                <Tooltip
+                  label={`${nextLevel.threshold - orderCount} orders until ${nextLevel.name}`}
+                  placement="top"
+                  hasArrow
+                >
+                  <Text fontSize="sm" color="green.500" fontWeight="semibold">
+                    {Math.round(progressToNextLevel)}%
+                  </Text>
+                </Tooltip>
+              </HStack>
+              <Progress
+                value={progressToNextLevel}
+                size="sm"
+                colorScheme="green"
+                borderRadius="full"
+                hasStripe
+                isAnimated
+              />
+            </Box>
+          )}
+
+          {/* Benefits Section */}
+          <Box>
+            <Text fontSize="sm" fontWeight="semibold" mb={3} color={textColor}>
+              Your Benefits
+            </Text>
+            <HStack spacing={2} flexWrap="wrap">
+              {currentLevel.perks.map((perk, index) => (
+                <Badge
+                  key={index}
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  bg={badgeBg}
+                  color={textColor}
+                  fontSize="sm"
+                >
+                  {perk}
+                </Badge>
+              ))}
+            </HStack>
+          </Box>
+        </VStack>
+      </Box>
     </Box>
   );
 };

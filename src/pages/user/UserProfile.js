@@ -203,102 +203,120 @@ const UserProfile = () => {
   };
 
   const OrderCard = ({ order }) => {
-    const statusColor = getStatusColor(order.status);
-
+    const getStatusColor = (status) => {
+      const colors = {
+        pending: 'yellow',
+        processing: 'blue',
+        completed: 'green',
+        cancelled: 'red',
+      };
+      return colors[status.toLowerCase()] || 'gray';
+    };
+  
     return (
-      <Box
-        bg={cardBg}
-        p={6}
-        borderRadius="lg"
-        borderWidth="1px"
-        borderColor={borderColor}
-        _hover={{ shadow: hoverShadow }}
-        transition="all 0.2s"
-      >
-        <VStack align="stretch" spacing={4}>
-          <Box display="flex" justifyContent="space-between" alignItems="start">
-            <VStack align="start" spacing={1}>
-              <Text fontWeight="bold" fontSize="lg">
-                Order #{order.id.slice(-6)}
+      <Box position="relative">
+        <Box 
+          position="absolute"
+          inset="0"
+          transform="translate(5px, 5px)"
+          bg="black"
+          borderRadius="lg"
+        />
+        <Box
+          position="relative"
+          bg="white"
+          _dark={{ bg: 'gray.800' }}
+          p={6}
+          borderRadius="lg"
+          borderWidth="2px"
+          borderColor="black"
+          _hover={{ boxShadow: 'lg' }}
+          transition="all 0.2s"
+        >
+          <VStack align="stretch" spacing={4}>
+            <Box display="flex" justifyContent="space-between" alignItems="start">
+              <VStack align="start" spacing={1}>
+                <Text fontWeight="bold" fontSize="lg">
+                  Order #{order.id.slice(-6)}
+                </Text>
+                <Text fontSize="sm" color="gray.500">
+                  {format(order.createdAt, 'PPp')}
+                </Text>
+              </VStack>
+              <Badge
+                colorScheme={getStatusColor(order.status)}
+                px={3}
+                py={1}
+                borderRadius="full"
+                textTransform="capitalize"
+              >
+                {order.status.replace('_', ' ')}
+              </Badge>
+            </Box>
+  
+            <Divider />
+  
+            <Box>
+              <Text fontWeight="medium" mb={2}>
+                Items:
               </Text>
+              <VStack align="stretch" spacing={1}>
+                {order.items.map((item, index) => (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent="space-between"
+                    fontSize="sm"
+                  >
+                    <Text>
+                      {item.quantity}x {item.name}
+                    </Text>
+                    <Text>Rs.{(item.price * item.quantity).toFixed(2)}</Text>
+                  </Box>
+                ))}
+              </VStack>
+            </Box>
+  
+            <Divider />
+  
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Text fontWeight="bold">Total:</Text>
+              <Text fontWeight="bold" fontSize="lg" color="green.600" _dark={{ color: 'green.300' }}>
+                Rs.{order.total.toFixed(2)}
+              </Text>
+            </Box>
+  
+            {order.status === 'completed' && order.pickupCode && (
+              <Alert status="info" borderRadius="md">
+                <AlertIcon />
+                <Text>
+                  Pickup Code: <Text as="span" fontWeight="bold">{order.pickupCode}</Text>
+                </Text>
+              </Alert>
+            )}
+  
+            {order.completedAt && (
               <Text fontSize="sm" color="gray.500">
-                {format(order.createdAt, 'PPp')}
+                Completed: {format(order.completedAt, 'PPp')}
               </Text>
-            </VStack>
-            <Badge
-              colorScheme={statusColor}
-              px={3}
-              py={1}
-              borderRadius="full"
-              textTransform="capitalize"
-            >
-              {order.status.replace('_', ' ')}
-            </Badge>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Text fontWeight="medium" mb={2}>
-              Items:
-            </Text>
-            <VStack align="stretch" spacing={1}>
-              {order.items.map((item, index) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  justifyContent="space-between"
-                  fontSize="sm"
-                >
-                  <Text>
-                    {item.quantity}x {item.name}
-                  </Text>
-                  <Text>Rs.{(item.price * item.quantity).toFixed(2)}</Text>
-                </Box>
-              ))}
-            </VStack>
-          </Box>
-
-          <Divider />
-
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Text fontWeight="bold">Total:</Text>
-            <Text fontWeight="bold" fontSize="lg" color={useColorModeValue('green.600', 'green.300')}>
-              Rs.{order.total.toFixed(2)}
-            </Text>
-          </Box>
-
-          {order.status === 'completed' && order.pickupCode && (
-            <Alert status="info" borderRadius="md">
-              <AlertIcon />
-              <Text>
-                Pickup Code: <Text as="span" fontWeight="bold">{order.pickupCode}</Text>
+            )}
+  
+            {order.pickedUpAt && (
+              <Text fontSize="sm" color="gray.500">
+                Picked up: {format(order.pickedUpAt, 'PPp')}
               </Text>
-            </Alert>
-          )}
-
-          {order.completedAt && (
-            <Text fontSize="sm" color="gray.500">
-              Completed: {format(order.completedAt, 'PPp')}
-            </Text>
-          )}
-
-          {order.pickedUpAt && (
-            <Text fontSize="sm" color="gray.500">
-              Picked up: {format(order.pickedUpAt, 'PPp')}
-            </Text>
-          )}
-
-          {order.shopName && (
-            <Text fontSize="sm" color="gray.500">
-              Shop: {order.shopName}
-            </Text>
-          )}
-        </VStack>
+            )}
+  
+            {order.shopName && (
+              <Text fontSize="sm" color="gray.500">
+                Shop: {order.shopName}
+              </Text>
+            )}
+          </VStack>
+        </Box>
       </Box>
     );
   };
-
   const OrderSkeleton = () => (
     <Box
       p={6}
