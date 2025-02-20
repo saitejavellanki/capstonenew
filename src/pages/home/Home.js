@@ -187,18 +187,20 @@ const PopularShopCard = ({ shop, onClick }) => (
 
 // Enhanced Order Card
 const OrderCard = ({ order, onViewDetails }) => (
-  <MotionBox
+  <Box
     p={5}
-    bg="white"
+    bg="orange.50"
     borderRadius="xl"
-    boxShadow="md"
+    borderWidth="1px"
+    borderColor="black"
+    boxShadow="5px 5px 0px 0px rgba(0,0,0,1)"
     w="full"
-    _hover={{ boxShadow: 'xl' }}
+    _hover={{ boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }}
     transition="all 0.3s ease"
-    whileHover={{ y: -2 }}
+    mb={4}
   >
-    <Flex 
-      justify="space-between" 
+    <Flex
+      justify="space-between"
       align="center"
       direction={{ base: 'column', sm: 'row' }}
       gap={4}
@@ -207,10 +209,10 @@ const OrderCard = ({ order, onViewDetails }) => (
         <Text fontWeight="bold" fontSize={{ base: 'lg', md: 'xl' }}>
           {order.shopName || 'Unknown Shop'}
         </Text>
-        <Badge 
+        <Badge
           colorScheme={
-            order.status === 'completed' ? 'green' : 
-            order.status === 'processing' ? 'orange' : 
+            order.status === 'completed' ? 'green' :
+            order.status === 'processing' ? 'orange' :
             'blue'
           }
           fontSize="sm"
@@ -227,13 +229,24 @@ const OrderCard = ({ order, onViewDetails }) => (
         onClick={() => onViewDetails(order.id)}
         leftIcon={<FaEye />}
         w={{ base: 'full', sm: 'auto' }}
+        borderWidth="1px"
+        borderColor="black"
+        boxShadow="3px 3px 0px 0px rgba(0,0,0,1)"
+        _hover={{ 
+          boxShadow: "5px 5px 0px 0px rgba(0,0,0,1)",
+          transform: "translateY(-2px)"
+        }}
+        _active={{
+          boxShadow: "1px 1px 0px 0px rgba(0,0,0,1)",
+          transform: "translateY(1px)"
+        }}
+        transition="all 0.2s ease"
       >
         View Details
       </Button>
     </Flex>
-  </MotionBox>
+  </Box>
 );
-
 const Home = () => {
   const navigate = useNavigate();
   const [activeOrders, setActiveOrders] = useState([]);
@@ -631,50 +644,89 @@ const Home = () => {
     </AlertDescription>
   </Box>
 </Alert>
-        <Modal
-          isOpen={isOrderModalOpen}
-          onClose={() => setIsOrderModalOpen(false)}
-          size="xl"
-          motionPreset="slideInBottom"
-          scrollBehavior="inside"
-        >
-          <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-          <ModalContent 
-            borderRadius="xl" 
-            mx={4}
-            bg="white"
+<Modal
+  isOpen={isOrderModalOpen}
+  onClose={() => setIsOrderModalOpen(false)}
+  size="xl"
+  motionPreset="slideInBottom"
+  scrollBehavior="inside"
+>
+  <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+  <ModalContent
+    borderRadius="xl"
+    mx={4}
+    bg="white"
+    borderWidth="2px"
+    borderColor="black"
+    overflow="hidden"
+  >
+    <ModalHeader 
+      fontSize={{ base: 'xl', md: '2xl' }} 
+      fontWeight="bold"
+      borderBottomWidth="1px"
+      borderBottomColor="black"
+      py={4}
+    >
+      Your Active Orders
+    </ModalHeader>
+    <ModalCloseButton 
+      top="4"
+      right="4"
+      size="lg"
+      color="black"
+    />
+    <ModalBody py={6} px={{ base: 4, md: 6 }}>
+      <VStack spacing={4} align="stretch" w="full">
+        {activeOrders.length > 0 ? (
+          activeOrders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              onViewDetails={(orderId) => {
+                navigate(`/order-waiting/${orderId}`);
+                setIsOrderModalOpen(false);
+              }}
+            />
+          ))
+        ) : (
+          <Box
+            textAlign="center"
+            py={10}
+            color="gray.600"
           >
-            <ModalHeader fontSize={{ base: 'xl', md: '2xl' }} fontWeight="bold">
-              Your Active Orders
-            </ModalHeader>
-            <ModalCloseButton />
-            <Divider />
-            <ModalBody py={6}>
-              <VStack spacing={4}>
-                {activeOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onViewDetails={(orderId) => {
-                      navigate(`/order-waiting/${orderId}`);
-                      setIsOrderModalOpen(false);
-                    }}
-                  />
-                ))}
-              </VStack>
-            </ModalBody>
-            <Divider />
-            <ModalFooter>
-              <Button 
-                onClick={() => setIsOrderModalOpen(false)} 
-                size="lg"
-                w={{ base: 'full', sm: 'auto' }}
-              >
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+            <Text fontSize="lg">You don't have any active orders at the moment.</Text>
+          </Box>
+        )}
+      </VStack>
+    </ModalBody>
+    <ModalFooter
+      borderTopWidth="1px"
+      borderTopColor="black"
+      py={4}
+    >
+      <Button
+        onClick={() => setIsOrderModalOpen(false)}
+        size="lg"
+        w={{ base: 'full', sm: 'auto' }}
+        colorScheme="green"
+        borderWidth="1px"
+        borderColor="black"
+        boxShadow="3px 3px 0px 0px rgba(0,0,0,1)"
+        _hover={{ 
+          boxShadow: "5px 5px 0px 0px rgba(0,0,0,1)",
+          transform: "translateY(-2px)"
+        }}
+        _active={{
+          boxShadow: "1px 1px 0px 0px rgba(0,0,0,1)",
+          transform: "translateY(1px)"
+        }}
+        transition="all 0.2s ease"
+      >
+        Close
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
       </Container>
     </Box>
   );
